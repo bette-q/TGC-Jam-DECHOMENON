@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewMonoBehaviourScript : MonoBehaviour
+public class SocketManager : MonoBehaviour
 {
+    public Transform torsoRoot;
+    public Transform[] sockets;
+
     public GameObject torso;
     public GameObject[] organPrefabs;
 
@@ -13,7 +16,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
     private Dictionary<string, GameObject> attached = new Dictionary<string, GameObject>();
 
     //for random attachment
-    private string[] sockets = { 
+    private string[] bodySocket = { 
                                  "LeftShoulder", 
                                  "RightShoulder",
                                  "LeftLeg",
@@ -44,8 +47,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void AttachRandom()
     {
-        int socketIdx = Random.Range(0, sockets.Length);
-        string location = sockets[socketIdx];
+        int socketIdx = Random.Range(0, bodySocket.Length);
+        string location = bodySocket[socketIdx];
 
         int prefabIdx = Random.Range(0, organPrefabs.Length);
 
@@ -58,8 +61,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     public void AttachRed()
     {
-        int socketIdx = Random.Range(0, sockets.Length);
-        string location = sockets[socketIdx];
+        int socketIdx = Random.Range(0, bodySocket.Length);
+        string location = bodySocket[socketIdx];
 
         Debug.LogWarning("Attach Red at: " + location);
 
@@ -68,8 +71,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     public void AttachBlue()
     {
-        int socketIdx = Random.Range(0, sockets.Length);
-        string location = sockets[socketIdx];
+        int socketIdx = Random.Range(0, bodySocket.Length);
+        string location = bodySocket[socketIdx];
 
         Debug.LogWarning("Attach Blue at: " + location);
 
