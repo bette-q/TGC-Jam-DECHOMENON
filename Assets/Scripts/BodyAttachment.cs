@@ -4,11 +4,24 @@ using UnityEngine;
 public class NewMonoBehaviourScript : MonoBehaviour
 {
     public GameObject torso;
-    public GameObject bodyPart;
+    public GameObject[] organPrefabs;
 
+    public GameObject red;
+    public GameObject blue;
+
+    //track socket status
     private Dictionary<string, GameObject> attached = new Dictionary<string, GameObject>();
 
-    public void AttachBodyPart(string location) 
+    //for random attachment
+    private string[] sockets = { 
+                                 "LeftShoulder", 
+                                 "RightShoulder",
+                                 "LeftLeg",
+                                 "RightLeg",
+                                 "Head"
+    };
+
+    public void AttachBodyPart(string location, int prefabIdx) 
     {
         if (attached.ContainsKey(location))
         {
@@ -25,19 +38,54 @@ public class NewMonoBehaviourScript : MonoBehaviour
             return;
         }
 
-        GameObject newAttachment = Instantiate(bodyPart, attachPoint.position, attachPoint.rotation, torso.transform);
+        GameObject newAttachment = Instantiate(organPrefabs[prefabIdx], attachPoint.position, attachPoint.rotation, torso.transform);
         attached[location] = newAttachment;
     }
+
+    private void AttachRandom()
+    {
+        int socketIdx = Random.Range(0, sockets.Length);
+        string location = sockets[socketIdx];
+
+        int prefabIdx = Random.Range(0, organPrefabs.Length);
+
+        Debug.LogWarning("location: " + location + " prefab: " + prefabIdx);
+
+
+        AttachBodyPart(location, prefabIdx);
+
+    }
+
+    public void AttachRed()
+    {
+        int socketIdx = Random.Range(0, sockets.Length);
+        string location = sockets[socketIdx];
+
+        Debug.LogWarning("Attach Red at: " + location);
+
+        AttachBodyPart (location, 1);
+    }
+
+    public void AttachBlue()
+    {
+        int socketIdx = Random.Range(0, sockets.Length);
+        string location = sockets[socketIdx];
+
+        Debug.LogWarning("Attach Blue at: " + location);
+
+        AttachBodyPart(location, 0);
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        AttachBodyPart("LeftShoulder");
+        //InvokeRepeating("AttachRandom", 0f, 5f);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+      
     }
 
 

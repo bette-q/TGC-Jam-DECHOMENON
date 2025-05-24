@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 298447503425645358}
   - component: {fileID: 4111498440762123072}
   m_Layer: 0
-  m_Name: Arm
+  m_Name: BlueArm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f9870ef08f239da48a7df62f9bff0818, type: 2}
+  - {fileID: 2100000, guid: 2686506c6de3349479416275c52420ea, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
