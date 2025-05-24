@@ -6,77 +6,61 @@ public class SocketManager : MonoBehaviour
     public Transform torsoRoot;
     public Transform[] sockets;
 
-    public GameObject torso;
-    public GameObject[] organPrefabs;
+    [SerializeField] GameObject[] organPrefabs;
+    [SerializeField] int greenSocketCt = 3;
 
-    public GameObject red;
-    public GameObject blue;
 
     //track socket status
-    private Dictionary<string, GameObject> attached = new Dictionary<string, GameObject>();
+    private Dictionary<int, GameObject> attached = new Dictionary<int, GameObject>();
 
-    //for random attachment
-    private string[] bodySocket = { 
-                                 "LeftShoulder", 
-                                 "RightShoulder",
-                                 "LeftLeg",
-                                 "RightLeg",
-                                 "Head"
-    };
-
-    public void AttachBodyPart(string location, int prefabIdx) 
+    //attach and socket status only, pass combo as a whole later
+    public void AttachBodyPart(int socketIdx, int prefabIdx) 
     {
-        if (attached.ContainsKey(location))
+        if (attached.ContainsKey(socketIdx))
         {
             //remove from screen
-            Destroy(attached[location]);
-            attached.Remove(location);
+            Destroy(attached[socketIdx]);
+            attached.Remove(socketIdx);
         }
 
         //check if input location is valid
-        Transform attachPoint = torso.transform.Find(location);
+        Transform attachPoint = sockets[socketIdx].transform;
         if(attachPoint == null)
         {
-            Debug.LogWarning("No attach point found at: " + location);
+            Debug.LogWarning("No attach point found at socket: " + socketIdx);
             return;
         }
 
-        GameObject newAttachment = Instantiate(organPrefabs[prefabIdx], attachPoint.position, attachPoint.rotation, torso.transform);
-        attached[location] = newAttachment;
+        GameObject newAttachment = Instantiate(organPrefabs[prefabIdx], attachPoint.position, attachPoint.rotation, torsoRoot);
+        attached[socketIdx] = newAttachment;
     }
 
-    private void AttachRandom()
+    //attach random with green/red distinction
+    private void AttachRandom(int prefabIdx, bool isGreen)
     {
-        int socketIdx = Random.Range(0, bodySocket.Length);
-        string location = bodySocket[socketIdx];
+   
+        int socketIdx = isGreen ? Random.Range(0, greenSocketCt) : Random.Range(0, sockets.Length);
 
-        int prefabIdx = Random.Range(0, organPrefabs.Length);
-
-        Debug.LogWarning("location: " + location + " prefab: " + prefabIdx);
+        Debug.LogWarning("location: " + socketIdx + " prefab: " + prefabIdx);
 
 
-        AttachBodyPart(location, prefabIdx);
+        AttachBodyPart(socketIdx, prefabIdx);
 
     }
 
     public void AttachRed()
     {
-        int socketIdx = Random.Range(0, bodySocket.Length);
-        string location = bodySocket[socketIdx];
 
-        Debug.LogWarning("Attach Red at: " + location);
 
-        AttachBodyPart (location, 1);
+        AttachRandom (1, false);
     }
 
     public void AttachBlue()
     {
-        int socketIdx = Random.Range(0, bodySocket.Length);
-        string location = bodySocket[socketIdx];
 
-        Debug.LogWarning("Attach Blue at: " + location);
 
-        AttachBodyPart(location, 0);
+        AttachRandom(0, true);
+
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
