@@ -1,21 +1,32 @@
 using System.Collections.Generic;
+using System.Net.Sockets;
 using UnityEngine;
+
+
+//add a middle layer between socket and organs
+[System.Serializable]
+public class SocketBinding 
+{
+    public Transform socket;       // e.g. socket0
+    public Transform comboAnchor;  // child of socket0
+}
 
 public class SocketManager : MonoBehaviour
 {
     public Transform torsoRoot;
-    public Transform[] sockets;
-
-    [SerializeField] GameObject[] organPrefabs;
+    public List<SocketBinding> sockets;
     [SerializeField] int greenSocketCt = 3;
 
+    //[SerializeField] GameObject[] organPrefabs;
 
     //track socket status
     private Dictionary<int, GameObject> attached = new Dictionary<int, GameObject>();
 
     //attach and socket status only, pass combo as a whole later
-    public void AttachBodyPart(int socketIdx, int prefabIdx) 
+    private void AttachBodyPart(int socketIdx, GameObject organRoot) 
     {
+        UnityEngine.Debug.Assert(socketIdx >= 0 && socketIdx < sockets.Count, $"Invalid socketIdx: {socketIdx}");
+
         if (attached.ContainsKey(socketIdx))
         {
             //remove from screen
@@ -23,28 +34,51 @@ public class SocketManager : MonoBehaviour
             attached.Remove(socketIdx);
         }
 
-        //check if input location is valid
-        Transform attachPoint = sockets[socketIdx].transform;
-        if(attachPoint == null)
+        Transform attachPoint = sockets[socketIdx].comboAnchor.transform;
+        Transform inputSocket = organRoot.transform.Find("SocketHead");
+
+/*        Debug.Log("Socket_Head position: " + inputSocket.position);
+        Debug.Log("Socket_Head rotation: " + inputSocket.rotation.eulerAngles);
+        Debug.Log("arm pos: " + organRoot.transform.position);
+*/
+
+        // First, calculate correct world position and rotation
+        if (inputSocket != null)
         {
-            Debug.LogWarning("No attach point found at socket: " + socketIdx);
-            return;
+            Vector3 offset = attachPoint.rotation * (-inputSocket.position);
+
+            organRoot.transform.position = attachPoint.position + offset;
+            organRoot.transform.rotation = attachPoint.rotation;
+        }
+        else
+        {
+            organRoot.transform.position = attachPoint.position;
+            organRoot.transform.rotation = attachPoint.rotation;
         }
 
-        GameObject newAttachment = Instantiate(organPrefabs[prefabIdx], attachPoint.position, attachPoint.rotation, torsoRoot);
-        attached[socketIdx] = newAttachment;
+/*
+        Debug.Log("After transform: ");
+        Debug.Log("Socket_Head position: " + inputSocket.position);
+        Debug.Log("Socket_Head rotation: " + inputSocket.rotation.eulerAngles);
+        Debug.Log("arm pos: " + organRoot.transform.position);
+        Debug.Log("anchor pos: " + attachPoint.position);*/
+
+
+        // Then parent to the socket
+        organRoot.transform.SetParent(attachPoint, true);
+        attached[socketIdx] = organRoot;
     }
 
     //attach random with green/red distinction
-    private void AttachRandom(int prefabIdx, bool isGreen)
+    public void AttachRandom(GameObject organRoot, bool isGreen)
     {
-   
-        int socketIdx = isGreen ? Random.Range(0, greenSocketCt) : Random.Range(0, sockets.Length);
 
-        Debug.LogWarning("location: " + socketIdx + " prefab: " + prefabIdx);
+        int socketIdx = isGreen ? Random.Range(0, greenSocketCt) : Random.Range(0, sockets.Count);
+
+        Debug.LogWarning("location: " + socketIdx + " prefab: " + organRoot.name);
 
 
-        AttachBodyPart(socketIdx, prefabIdx);
+        AttachBodyPart(socketIdx, organRoot);
 
     }
 
@@ -52,14 +86,14 @@ public class SocketManager : MonoBehaviour
     {
 
 
-        AttachRandom (1, false);
+        //AttachRandom (1, false);
     }
 
     public void AttachBlue()
     {
 
 
-        AttachRandom(0, true);
+        //AttachRandom(0, true);
 
     }
 

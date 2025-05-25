@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 [CustomEditor(typeof(SocketManager))]
 public class SocketManagerEditor : Editor
@@ -10,36 +11,39 @@ public class SocketManagerEditor : Editor
 
         SocketManager manager = (SocketManager)target;
 
-        if (GUILayout.Button("Auto-Fill Sockets from Torso Root"))
+        if (GUILayout.Button("Auto-Find Socket/Anchor Pairs"))
         {
-            if (manager.torsoRoot == null)
-            {
-                Debug.LogWarning("Assign a Torso Root first.");
-                return;
-            }
+            Undo.RecordObject(manager, "Auto-Find Sockets");
 
-            var socketList = new System.Collections.Generic.List<Transform>();
+            manager.sockets = new List<SocketBinding>();
+
             foreach (Transform child in manager.torsoRoot)
             {
-                if (child.name.ToLower().Contains("socket"))
-                    socketList.Add(child);
+                if (child.name.ToLower().StartsWith("socket"))
+                {
+                    Transform anchor = child.Find("Anchor");
+                    if (anchor != null)
+                    {
+                        SocketBinding binding = new SocketBinding
+                        {
+                            socket = child,
+                            comboAnchor = anchor
+
+                        };
+
+                        Debug.LogWarning("Socket added: " + child.name + " | Position: " + child.transform.position + " | Anchor: " + anchor.name + " at " + anchor.position);
+                        manager.sockets.Add(binding);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Socket '{child.name}' is missing a ComboAnchor child.");
+                    }
+                }
             }
 
-            //socketList.Sort((a, b) => string.Compare(a.name, b.name));
-
-            Debug.Log("Socket order and transforms:");
-            for (int i = 0; i < socketList.Count; i++)
-            {
-                Transform t = socketList[i];
-                string pos = t.position.ToString("F3");    // world position
-                string rot = t.eulerAngles.ToString("F1"); // world rotation
-                Debug.Log($"{i}: {t.name} | Position: {pos} | Rotation: {rot}");
-            }
-
-            manager.sockets = socketList.ToArray();
+            Debug.LogWarning(manager.sockets.Count + " loaded");
 
             EditorUtility.SetDirty(manager);
-            Debug.Log($"Filled {socketList.Count} sockets.");
         }
     }
 }
