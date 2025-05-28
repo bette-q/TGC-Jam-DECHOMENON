@@ -54,10 +54,8 @@ public class ComboUIManager : MonoBehaviour
 
     void Start()
     {
-        selectedPrefabs = new List<GameObject> { prefabA, prefabB, prefabC }; // or however you're loading these
+       // selectedPrefabs = new List<GameObject> { prefabA, prefabB, prefabC }; // or however you're loading these
 
-        prefabButtonTemplate.SetActive(false);
-        PopulateSelectionPanel();
         confirmButton.onClick.AddListener(OnConfirmOrder);
 
         for (int i = 0; i < orderedSlots.Count; i++)
@@ -82,7 +80,7 @@ public class ComboUIManager : MonoBehaviour
 
     void PopulateSelectionPanel()
     {
-        foreach (GameObject prefab in selectedPrefabs)
+         foreach (GameObject prefab in selectedPrefabs)
         {
             GameObject newButton = Instantiate(prefabButtonTemplate, selectionPanel);
             newButton.SetActive(true);
@@ -98,6 +96,31 @@ public class ComboUIManager : MonoBehaviour
             });
         }
     }
+
+    public void LoadSelectedCards(List<GameObject> selected)
+    {
+        selectedPrefabs = new List<GameObject>(selected);
+
+        // Clear any previous buttons in UI
+        foreach (Transform child in selectionPanel)
+        {
+            if (child.gameObject != prefabButtonTemplate) // keep template
+                Destroy(child.gameObject);
+        }
+
+        prefabButtonTemplate.SetActive(false);
+
+        // Populate with new selection
+        PopulateSelectionPanel();
+
+        // Clear previous slot assignments
+        foreach (var slot in orderedSlots)
+            slot.Clear();
+
+        currentlySelectedPrefab = null;
+        isAwaitingRedConfirmation = false;
+    }
+
 
     void OnSlotClicked(OrganSlot slot)
     {
