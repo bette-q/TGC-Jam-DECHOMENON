@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
+using Unity.Burst.Intrinsics;
 using UnityEngine;
 
 
@@ -22,7 +23,6 @@ public class SocketManager : MonoBehaviour
     //track socket status
     private Dictionary<int, GameObject> attached = new Dictionary<int, GameObject>();
 
-    //attach and socket status only, pass combo as a whole later
     private void AttachBodyPart(int socketIdx, GameObject organRoot) 
     {
         UnityEngine.Debug.Assert(socketIdx >= 0 && socketIdx < sockets.Count, $"Invalid socketIdx: {socketIdx}");
@@ -35,7 +35,7 @@ public class SocketManager : MonoBehaviour
         }
 
         Transform attachPoint = sockets[socketIdx].comboAnchor.transform;
-        Transform inputSocket = organRoot.transform.Find("SocketHead");
+        Transform inputSocket = organRoot.transform.GetChild(0).Find("SocketHead"); // combo -> root organ
 
 /*        Debug.Log("Socket_Head position: " + inputSocket.position);
         Debug.Log("Socket_Head rotation: " + inputSocket.rotation.eulerAngles);
@@ -45,6 +45,7 @@ public class SocketManager : MonoBehaviour
         // First, calculate correct world position and rotation
         if (inputSocket != null)
         {
+            //rotated offset
             Vector3 offset = attachPoint.rotation * (-inputSocket.position);
 
             organRoot.transform.position = attachPoint.position + offset;
@@ -69,7 +70,7 @@ public class SocketManager : MonoBehaviour
         attached[socketIdx] = organRoot;
     }
 
-    //attach random with green/red distinction
+    //attach to random socket with green/red distinction
     public void AttachRandom(GameObject organRoot, bool isGreen)
     {
 
