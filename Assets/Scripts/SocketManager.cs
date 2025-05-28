@@ -37,32 +37,46 @@ public class SocketManager : MonoBehaviour
         Transform attachPoint = sockets[socketIdx].comboAnchor.transform;
         Transform inputSocket = organRoot.transform.GetChild(0).Find("SocketHead"); // combo -> root organ
 
-/*        Debug.Log("Socket_Head position: " + inputSocket.position);
-        Debug.Log("Socket_Head rotation: " + inputSocket.rotation.eulerAngles);
-        Debug.Log("arm pos: " + organRoot.transform.position);
-*/
-
-        // First, calculate correct world position and rotation
         if (inputSocket != null)
         {
-            //rotated offset
-            Vector3 offset = attachPoint.rotation * (-inputSocket.position);
+            // First, orient the organ so that X+ points along attachPoint.up
+            organRoot.transform.rotation = Quaternion.LookRotation(
+                attachPoint.up,         // prefab's X+ maps to attachPoint.up
+                attachPoint.forward     // prefab's Y+ maps to attachPoint.forward
+            );
 
-            organRoot.transform.position = attachPoint.position + offset;
-            organRoot.transform.rotation = attachPoint.rotation;
+            // Then apply the offset: move the organ so inputSocket aligns with attachPoint
+            Vector3 worldOffset = organRoot.transform.TransformVector(-inputSocket.localPosition);
+            organRoot.transform.position = attachPoint.position + worldOffset;
         }
         else
         {
+            // fallback with just alignment
             organRoot.transform.position = attachPoint.position;
-            organRoot.transform.rotation = attachPoint.rotation;
+            organRoot.transform.rotation = Quaternion.LookRotation(
+                attachPoint.up,
+                attachPoint.forward
+            );
         }
 
-/*
-        Debug.Log("After transform: ");
-        Debug.Log("Socket_Head position: " + inputSocket.position);
-        Debug.Log("Socket_Head rotation: " + inputSocket.rotation.eulerAngles);
-        Debug.Log("arm pos: " + organRoot.transform.position);
-        Debug.Log("anchor pos: " + attachPoint.position);*/
+
+        /* organRoot.transform.localScale = Vector3.one; // reset
+         organRoot.transform.localScale = attachPoint.localScale;*/
+
+        GameObject organInstance = Instantiate(organRoot, attachPoint);
+        organInstance.transform.localPosition = Vector3.zero;
+        organInstance.transform.localRotation = Quaternion.identity;
+
+        // Compensate for parent scale (usually torso's scale)
+        Vector3 parentScale = attachPoint.lossyScale;
+        Vector3 prefabWorldScale = organInstance.transform.lossyScale;
+
+        organInstance.transform.localScale = new Vector3(
+            organInstance.transform.localScale.x / prefabWorldScale.x * parentScale.x,
+            organInstance.transform.localScale.y / prefabWorldScale.y * parentScale.y,
+            organInstance.transform.localScale.z / prefabWorldScale.z * parentScale.z
+        );
+
 
 
         // Then parent to the socket
