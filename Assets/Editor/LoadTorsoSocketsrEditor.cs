@@ -3,7 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 
 [CustomEditor(typeof(SocketManager))]
-public class SocketManagerEditor : Editor
+public class LoadTorsoSocketsrEditor : Editor
 {
     public override void OnInspectorGUI()
     {

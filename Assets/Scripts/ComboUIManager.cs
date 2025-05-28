@@ -48,6 +48,8 @@ public class ComboUIManager : MonoBehaviour
     private List<GameObject> selectedPrefabs;
 
     private GameObject currentlySelectedPrefab = null;
+    private bool isAwaitingRedConfirmation = false;
+
 
 
     void Start()
@@ -130,9 +132,24 @@ public class ComboUIManager : MonoBehaviour
     void ResetAllSlots(string message)
     {
         Debug.Log(message);
+        isAwaitingRedConfirmation = false;
+
         foreach (var slot in orderedSlots)
+        {
             slot.Clear();
+            slot.slotButton.image.color = Color.white;
+        }
     }
+
+
+    void HighlightAllSlots(Color color)
+    {
+        foreach (var slot in orderedSlots)
+        {
+            slot.slotButton.image.color = color;
+        }
+    }
+
 
     void OnConfirmOrder()
     {
@@ -170,9 +187,23 @@ public class ComboUIManager : MonoBehaviour
             return;
         }
 
+        // Combo is red (no conductor)
+        if (!hasConductor && !isAwaitingRedConfirmation)
+        {
+            isAwaitingRedConfirmation = true;
+            HighlightAllSlots(Color.red);
+            Debug.Log("Warning: This is a RED combo. Confirm again to proceed.");
+            return;
+        }
+
+        // Proceed with combo
+        isAwaitingRedConfirmation = false;
+
         bool isGreen = hasConductor;
 
         Object.FindFirstObjectByType<ComboManager>().BuildFromOrder(orderedPrefabs, isGreen);
+
+        HighlightAllSlots(Color.white);//reset highlight
     }
 
 }
