@@ -63,24 +63,41 @@ public class SocketManager : MonoBehaviour
         /* organRoot.transform.localScale = Vector3.one; // reset
          organRoot.transform.localScale = attachPoint.localScale;*/
 
-        GameObject organInstance = Instantiate(organRoot, attachPoint);
-        organInstance.transform.localPosition = Vector3.zero;
-        organInstance.transform.localRotation = Quaternion.identity;
+        /*        GameObject organInstance = Instantiate(organRoot, attachPoint);
+                organInstance.transform.localPosition = Vector3.zero;
+                organInstance.transform.localRotation = Quaternion.identity;
 
-        // Compensate for parent scale (usually torso's scale)
+                // Compensate for parent scale (usually torso's scale)
+                Vector3 parentScale = attachPoint.lossyScale;
+                Vector3 prefabWorldScale = organInstance.transform.lossyScale;
+
+                organInstance.transform.localScale = new Vector3(
+                    organInstance.transform.localScale.x / prefabWorldScale.x * parentScale.x,
+                    organInstance.transform.localScale.y / prefabWorldScale.y * parentScale.y,
+                    organInstance.transform.localScale.z / prefabWorldScale.z * parentScale.z
+                );
+        */
+        // Parent the original combo to the socket
+        organRoot.transform.SetParent(attachPoint, true);
+        organRoot.transform.localPosition = Vector3.zero;
+        organRoot.transform.localRotation = Quaternion.identity;
+
+        // Fix scale to match parent's world scale
         Vector3 parentScale = attachPoint.lossyScale;
-        Vector3 prefabWorldScale = organInstance.transform.lossyScale;
+        Vector3 currentScale = organRoot.transform.lossyScale;
 
-        organInstance.transform.localScale = new Vector3(
-            organInstance.transform.localScale.x / prefabWorldScale.x * parentScale.x,
-            organInstance.transform.localScale.y / prefabWorldScale.y * parentScale.y,
-            organInstance.transform.localScale.z / prefabWorldScale.z * parentScale.z
+        Vector3 scaleFix = new Vector3(
+            parentScale.x / currentScale.x,
+            parentScale.y / currentScale.y,
+            parentScale.z / currentScale.z
         );
 
+        // Apply correction to local scale
+        organRoot.transform.localScale = Vector3.Scale(organRoot.transform.localScale, scaleFix);
 
 
         // Then parent to the socket
-        organRoot.transform.SetParent(attachPoint, true);
+        // organRoot.transform.SetParent(attachPoint, true);
         attached[socketIdx] = organRoot;
     }
 
@@ -94,21 +111,6 @@ public class SocketManager : MonoBehaviour
 
 
         AttachBodyPart(socketIdx, organRoot);
-
-    }
-
-    public void AttachRed()
-    {
-
-
-        //AttachRandom (1, false);
-    }
-
-    public void AttachBlue()
-    {
-
-
-        //AttachRandom(0, true);
 
     }
 
