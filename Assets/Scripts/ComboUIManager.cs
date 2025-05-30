@@ -4,6 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
+public enum SlotType
+{
+    Root,
+    Conductor,
+    Terminal
+}
+
 public class ComboUIManager : MonoBehaviour
 {
     [System.Serializable]
@@ -11,33 +18,25 @@ public class ComboUIManager : MonoBehaviour
     {
         public Button slotButton;
         public TMP_Text labelText;
-        public OrganType expectedType;
+        public SlotType expectedType;
 
-        [HideInInspector] public GameObject assignedPrefab;
+        [HideInInspector] public OrganCard assignedCard;
 
-        public void Assign(GameObject prefab)
+        public void Assign(OrganCard card)
         {
-            assignedPrefab = prefab;
-            labelText.text = prefab.name;
-            slotButton.gameObject.name = $"Slot_{prefab.name}";
+            assignedCard = card;
+            labelText.text = card.organName;
+            slotButton.gameObject.name = $"Slot_{card.organName}";
         }
 
         public void Clear()
         {
-            assignedPrefab = null;
-
-            // Reset text and name
-            labelText.text = "Empty";
+            assignedCard = null;
+            labelText.text = expectedType.ToString();
             slotButton.gameObject.name = "Slot_Empty";
         }
     }
 
-    //list of prefabs to select from
-    // public List<GameObject> randomPrefabs = new()  -> will be passed from randomizer 
-    [Header("Prefabs")]
-    public GameObject prefabA;
-    public GameObject prefabB;
-    public GameObject prefabC;
 
     [Header("UI References")]
     public GameObject prefabButtonTemplate;
@@ -45,19 +44,17 @@ public class ComboUIManager : MonoBehaviour
     public Button confirmButton;
 
     public List<OrganSlot> orderedSlots;
-    private List<GameObject> selectedPrefabs;
+    private List<OrganCard> selectedCards;
 
-    private GameObject currentlySelectedPrefab = null;
+    private OrganCard currentlySelectedCard = null;
     private bool isAwaitingRedConfirmation = false;
 
 
 
     void Start()
     {
-        selectedPrefabs = new List<GameObject> { prefabA, prefabB, prefabC }; // or however you're loading these
+       // selectedPrefabs = new List<GameObject> { prefabA, prefabB, prefabC }; // or however you're loading these
 
-        prefabButtonTemplate.SetActive(false);
-        PopulateSelectionPanel();
         confirmButton.onClick.AddListener(OnConfirmOrder);
 
         for (int i = 0; i < orderedSlots.Count; i++)
@@ -66,11 +63,11 @@ public class ComboUIManager : MonoBehaviour
 
             // Assign expected organ type based on position
             if (i == 0)
-                slot.expectedType = OrganType.Terminal;
+                slot.expectedType = SlotType.Root;
             else if (i == orderedSlots.Count - 1)
-                slot.expectedType = OrganType.Actuator;
+                slot.expectedType = SlotType.Terminal;
             else
-                slot.expectedType = OrganType.Conductor;
+                slot.expectedType = SlotType.Conductor;
 
             // Capture index and wire up click
             var capturedSlot = slot;
@@ -82,52 +79,79 @@ public class ComboUIManager : MonoBehaviour
 
     void PopulateSelectionPanel()
     {
-        foreach (GameObject prefab in selectedPrefabs)
+        foreach (OrganCard card in selectedCards)
         {
             GameObject newButton = Instantiate(prefabButtonTemplate, selectionPanel);
             newButton.SetActive(true);
 
             Button btn = newButton.GetComponent<Button>();
-            TMP_Text label = newButton.GetComponentInChildren<TMP_Text>(); // TMP version
-            label.text = prefab.name;
+            TMP_Text label = newButton.GetComponentInChildren<TMP_Text>();
+            label.text = $"{card.organName} ({card.GetDefinition()})";
 
             btn.onClick.AddListener(() =>
             {
-                currentlySelectedPrefab = prefab;
-                Debug.Log($"Selected prefab: {prefab.name}");
+                currentlySelectedCard = card;
+                Debug.Log($"Selected card: {card.organName} ({card.GetDefinition()})");
             });
         }
     }
 
+
+    public void LoadSelectedCards(List<OrganCard> selected)
+    {
+        selectedCards = new List<OrganCard>(selected);
+
+        // Clear any previous buttons in UI
+        foreach (Transform child in selectionPanel)
+        {
+            if (child.gameObject != prefabButtonTemplate) // keep template
+                Destroy(child.gameObject);
+        }
+
+        prefabButtonTemplate.SetActive(false);
+
+        // Populate with new selection
+        PopulateSelectionPanel();
+
+        // Clear previous slot assignments
+        foreach (var slot in orderedSlots)
+            slot.Clear();
+
+        currentlySelectedCard = null;
+        isAwaitingRedConfirmation = false;
+    }
+
+
     void OnSlotClicked(OrganSlot slot)
     {
-        // If nothing is selected and the slot is filled, clear it
-        if (currentlySelectedPrefab == null && slot.assignedPrefab != null)
+        // If nothing selected and slot is filled ¡ú clear
+        if (currentlySelectedCard == null && slot.assignedCard != null)
         {
-            Debug.Log($"Cleared {slot.assignedPrefab.name} from slot.");
+            Debug.Log($"Cleared {slot.assignedCard.organName} from slot.");
             slot.Clear();
             return;
         }
 
-        // If same prefab is already assigned to another slot, remove it
+        // Remove from other slots
         foreach (var otherSlot in orderedSlots)
         {
-            if (otherSlot != slot && otherSlot.assignedPrefab == currentlySelectedPrefab)
+            if (otherSlot != slot && otherSlot.assignedCard == currentlySelectedCard)
             {
                 otherSlot.Clear();
             }
         }
 
-        // Toggle logic: if prefab already in this slot, clear it
-        if (slot.assignedPrefab == currentlySelectedPrefab)
+        // Toggle logic
+        if (slot.assignedCard == currentlySelectedCard)
         {
             slot.Clear();
         }
         else
         {
-            slot.Assign(currentlySelectedPrefab);
+            slot.Assign(currentlySelectedCard);
         }
     }
+
 
     void ResetAllSlots(string message)
     {
@@ -153,42 +177,50 @@ public class ComboUIManager : MonoBehaviour
 
     void OnConfirmOrder()
     {
-        bool isValid = true;
-        bool hasConductor = false;
+        bool isGreen = false;
         List<GameObject> orderedPrefabs = new();
 
-        for (int i = 0; i < orderedSlots.Count; i++)
+        OrganCard rootCard = null;
+        OrganCard terminalCard = null;
+        List<OrganCard> conductorCards = new();
+
+        // Categorize cards from slots
+        foreach (var slot in orderedSlots)
         {
-            var slot = orderedSlots[i];
-            var prefab = slot.assignedPrefab;
+            var card = slot.assignedCard;
+            if (card != null)
+                orderedPrefabs.Add(card.organPrefab);
 
-            if (slot.expectedType == OrganType.Terminal && prefab == null)
+            switch (slot.expectedType)
             {
-                Debug.LogWarning("Missing Terminal in first slot.");
-                isValid = false;
+                case SlotType.Root:
+                    rootCard = card;
+                    break;
+                case SlotType.Terminal:
+                    terminalCard = card;
+                    break;
+                case SlotType.Conductor:
+                    if (card != null)
+                        conductorCards.Add(card);
+                    break;
             }
-            else if (slot.expectedType == OrganType.Actuator && prefab == null)
-            {
-                Debug.LogWarning("Missing Actuator in last slot.");
-                isValid = false;
-            }
-            else if (slot.expectedType == OrganType.Conductor && prefab != null)
-            {
-                hasConductor = true;
-            }
-
-            if (prefab != null)
-                orderedPrefabs.Add(prefab);
         }
 
-        if (!isValid)
+        // Validate required slots
+        if (rootCard == null || terminalCard == null)
         {
-            ResetAllSlots("Invalid combo: must include Terminal and Actuator.");
+            ResetAllSlots("Invalid combo: Missing required root or terminal.");
             return;
         }
 
-        // Combo is red (no conductor)
-        if (!hasConductor && !isAwaitingRedConfirmation)
+        // Green combo = Cellular root, all Genetic conductors, Organic terminal
+        bool conductorsOK = conductorCards.TrueForAll(c => c.type == OrganType.Genetic);
+
+        isGreen = (rootCard.type == OrganType.Cellular) && 
+                  (terminalCard.type == OrganType.Organic) && 
+                  conductorsOK;
+
+        if (!isGreen && !isAwaitingRedConfirmation)
         {
             isAwaitingRedConfirmation = true;
             HighlightAllSlots(Color.red);
@@ -196,14 +228,12 @@ public class ComboUIManager : MonoBehaviour
             return;
         }
 
-        // Proceed with combo
         isAwaitingRedConfirmation = false;
 
-        bool isGreen = hasConductor;
-
         Object.FindFirstObjectByType<ComboManager>().BuildFromOrder(orderedPrefabs, isGreen);
-
-        HighlightAllSlots(Color.white);//reset highlight
+        HighlightAllSlots(Color.white);
     }
+
+
 
 }
