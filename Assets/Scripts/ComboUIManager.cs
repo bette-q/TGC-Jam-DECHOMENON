@@ -177,42 +177,50 @@ public class ComboUIManager : MonoBehaviour
 
     void OnConfirmOrder()
     {
-        bool isValid = true;
-        bool hasConductor = false;
+        bool isGreen = false;
         List<GameObject> orderedPrefabs = new();
 
-        for (int i = 0; i < orderedSlots.Count; i++)
+        OrganCard rootCard = null;
+        OrganCard terminalCard = null;
+        List<OrganCard> conductorCards = new();
+
+        // Categorize cards from slots
+        foreach (var slot in orderedSlots)
         {
-            var slot = orderedSlots[i];
             var card = slot.assignedCard;
-
-            if (slot.expectedType == SlotType.Root && card == null)
-            {
-                Debug.LogWarning("Missing Terminal in first slot.");
-                isValid = false;
-            }
-            else if (slot.expectedType == SlotType.Terminal && card == null)
-            {
-                Debug.LogWarning("Missing Actuator in last slot.");
-                isValid = false;
-            }
-            else if (slot.expectedType == SlotType.Conductor && card != null)
-            {
-                hasConductor = true;
-            }
-
             if (card != null)
                 orderedPrefabs.Add(card.organPrefab);
+
+            switch (slot.expectedType)
+            {
+                case SlotType.Root:
+                    rootCard = card;
+                    break;
+                case SlotType.Terminal:
+                    terminalCard = card;
+                    break;
+                case SlotType.Conductor:
+                    if (card != null)
+                        conductorCards.Add(card);
+                    break;
+            }
         }
 
-        if (!isValid)
+        // Validate required slots
+        if (rootCard == null || terminalCard == null)
         {
-            ResetAllSlots("Invalid combo: must include Terminal and Actuator.");
+            ResetAllSlots("Invalid combo: Missing required root or terminal.");
             return;
         }
 
-        // Combo is red (no conductor)
-        if (!hasConductor && !isAwaitingRedConfirmation)
+        // Green combo = Cellular root, all Genetic conductors, Organic terminal
+        bool conductorsOK = conductorCards.TrueForAll(c => c.type == OrganType.Genetic);
+
+        isGreen = (rootCard.type == OrganType.Cellular) && 
+                  (terminalCard.type == OrganType.Organic) && 
+                  conductorsOK;
+
+        if (!isGreen && !isAwaitingRedConfirmation)
         {
             isAwaitingRedConfirmation = true;
             HighlightAllSlots(Color.red);
@@ -220,14 +228,12 @@ public class ComboUIManager : MonoBehaviour
             return;
         }
 
-        // Proceed with combo
         isAwaitingRedConfirmation = false;
 
-        bool isGreen = hasConductor;
-
         Object.FindFirstObjectByType<ComboManager>().BuildFromOrder(orderedPrefabs, isGreen);
-
-        HighlightAllSlots(Color.white);//reset highlight
+        HighlightAllSlots(Color.white);
     }
+
+
 
 }

@@ -31,7 +31,7 @@ public class SelectionManager : MonoBehaviour
         currentCards[index].AssignRandomType();
 
         // Update definition label
-        TMP_Text defLabel = currentCardButtons[index].transform.Find("DefinitionText")?.GetComponent<TMP_Text>();
+        TMP_Text defLabel = currentCardButtons[index].transform.Find("Definition")?.GetComponent<TMP_Text>();
         if (defLabel != null)
         {
             defLabel.text = currentCards[index].GetDefinition();
@@ -48,7 +48,7 @@ public class SelectionManager : MonoBehaviour
         List<GameObject> shuffled = new List<GameObject>(organCardPrefabs);
         Shuffle(shuffled);
 
-        for (int i = 0; i < 9 && i < shuffled.Count; i++)
+        for (int i = 0; i < 5 && i < shuffled.Count; i++)
         {
             OrganCard card = new OrganCard(shuffled[i]);
             currentCards.Add(card);
@@ -60,9 +60,13 @@ public class SelectionManager : MonoBehaviour
             TMP_Text[] labels = button.GetComponentsInChildren<TMP_Text>();
             foreach (var label in labels)
             {
-                if (label.name == "NameText") label.text = card.organName;
-                else if (label.name == "DefinitionText") label.text = card.GetDefinition();
+                if (label.name == "Name") label.text = card.organName;
+                else if (label.name == "Definition") label.text = card.GetDefinition();
             }
+
+   /*         TMP_Text label = button.GetComponentInChildren<TMP_Text>();
+            label.text = $"{card.organName} ({card.GetDefinition()})";*/
+
 
             int capturedIndex = i;
             button.GetComponent<Button>().onClick.AddListener(() =>
