@@ -32,7 +32,7 @@ public class ComboUIManager : MonoBehaviour
         public void Clear()
         {
             assignedCard = null;
-            labelText.text = "Empty";
+            labelText.text = expectedType.ToString();
             slotButton.gameObject.name = "Slot_Empty";
         }
     }
