@@ -59,7 +59,7 @@ public static class PreviewHelper
         // 4) Reset the child¡¯s local transform so it¡¯s centered under the root
         go.transform.localPosition = Vector3.zero;
         go.transform.localRotation = Quaternion.identity;
-        go.transform.localScale = Vector3.one;
+        go.transform.localScale = Vector3.one * 0.8f;
 
         // Return the root to whoever called this
         return _currentRoot;

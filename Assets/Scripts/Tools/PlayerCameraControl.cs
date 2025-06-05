@@ -19,10 +19,10 @@ public class PlayerCameraControl : MonoBehaviour
     public float zoomSpeed = 5f;
 
     [Tooltip("Minimum allowed distance from camera to viewRoot.")]
-    public float minDistance = 2f;
+    public float minDistance = 0.5f;
 
     [Tooltip("Maximum allowed distance from camera to viewRoot.")]
-    public float maxDistance = 10f;
+    public float maxDistance = 20.0f;
 
     private Vector3 _lastMousePosition;
     private bool _isDragging = false;
