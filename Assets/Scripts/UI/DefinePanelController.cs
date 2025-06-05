@@ -1,205 +1,125 @@
-using System.Collections.Generic;
+// DefinePanelController.cs
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 public class DefinePanelController : MonoBehaviour
 {
-    [Header("Drag in your existing DefinePanel children")]
-    [Tooltip("DefinePanel/BodySelectPreview (RectTransform)")]
-    public RectTransform BodySelectPreview;
+    public HighlightButtonComponent btnCellular;
+    public HighlightButtonComponent btnGenetic;
+    public HighlightButtonComponent btnOrganic;
+    public Button RevertButton;
+    public Button RedefineButton;
 
-    [Tooltip("DefinePanel/CurrentDef (TMP_Text)")]
-    public TMP_Text CurrentDef;
-
-    [Tooltip("DefinePanel/selector (RectTransform)")]
-    public RectTransform selector;
-
-    [Tooltip("DefinePanel/SelectHighlight (Image)")]
-    public Image SelectHighlight;
-
-    [Tooltip("Prefab for one definition©\option row (Button + TMP_Text)")]
-    public GameObject definitionOptionPrefab;
-
-    // Externally assigned callback: called when the definition changes in the bottom panel.
-    // The top©\panel ¡°cardUI¡± will have supplied this so it can update its own label.
-    [HideInInspector]
-    public System.Action<string> OnDefinitionChangedExternally;
+    public Text CurrentDef;
 
     // Internals
-    private List<GameObject> currentOptionButtons = new List<GameObject>();
-    private OrganCard previewedCard = null;
-    private string originalDefinition;
+    private OrganCard previewedCard;
+    private OrganType selectedType;
+    private System.Action<string> onTopPanelUpdateCallback;
 
-    private void Awake()
+    void Awake()
     {
-        ClearPanel();
+        ClearPanelState();
     }
 
-    /// <summary>
-    /// Shows the chosen card¡¯s prefab, its definition, and spawns definition©\option buttons.
-    /// </summary>
-    public void ShowCardDetails(OrganCard card)
+    public void ShowCardDetails(OrganCard card, System.Action<string> topPanelCallback)
     {
         previewedCard = card;
+        onTopPanelUpdateCallback = topPanelCallback;
 
-        // 1) Clear any old preview object
-        foreach (Transform t in BodySelectPreview)
-            Destroy(t.gameObject);
+        // Get the card's current definition (string) and parse to enum
+        OrganType current = card.curType;
+        selectedType = current;
 
-        // 2) Instantiate the organPrefab under BodySelectPreview
-        if (card.organPrefab != null)
-        {
-            GameObject go = Instantiate(card.organPrefab, BodySelectPreview, false);
-            go.transform.localPosition = Vector3.zero;
-            go.transform.localRotation = Quaternion.identity;
-            // If it's a 3D prefab, you might have to tweak its scale or rotation so it ¡°fits¡± inside the UI box.
-        }
+        // Update text display
+        CurrentDef.text = current.ToString();
 
-        // 3) Show the card¡¯s current definition
-        originalDefinition = card.GetDefinition();
-        CurrentDef.text = originalDefinition;
+        // Deselect all option buttons first
+        btnCellular.ForceDeselect();
+        btnGenetic.ForceDeselect();
+        btnOrganic.ForceDeselect();
 
-        // 4) Spawn the three definition-option rows under ¡°selector¡±
-        PopulateDefinitionOptions(card);
+        // Force©\select the matching option by enum
+        if (current == OrganType.Cellular) btnCellular.ForceSelect();
+        else if (current == OrganType.Genetic) btnGenetic.ForceSelect();
+        else if (current == OrganType.Organic) btnOrganic.ForceSelect();
 
-        // 5) Move the highlight under whichever option matches originalDefinition
-        MoveHighlightTo(originalDefinition);
-
-        // 6) Make sure SelectHighlight is visible
-        SelectHighlight.gameObject.SetActive(true);
-
-        // Clear any leftover callback from a previous card
-        OnDefinitionChangedExternally = null;
+        // Enable control buttons
+        RevertButton.interactable = true;
+        RedefineButton.interactable = true;
     }
 
-    /// <summary>
-    /// Clears everything in the DefinePanel (hides preview, clears text & buttons).
-    /// </summary>
-    public void ClearPanel()
+    public void ClearPanelState()
     {
         previewedCard = null;
+        CurrentDef.text = "";
 
-        // Destroy preview object
-        foreach (Transform t in BodySelectPreview)
-            Destroy(t.gameObject);
+        RevertButton.interactable = false;
+        RedefineButton.interactable = false;
 
-        // Clear definition text
-        if (CurrentDef != null)
-            CurrentDef.text = "";
+        btnCellular.ForceDeselect();
+        btnGenetic.ForceDeselect();
+        btnOrganic.ForceDeselect();
 
-        // Destroy all option buttons
-        foreach (var btn in currentOptionButtons)
-            Destroy(btn);
-        currentOptionButtons.Clear();
-
-        // Hide highlight
-        if (SelectHighlight != null)
-            SelectHighlight.gameObject.SetActive(false);
+        onTopPanelUpdateCallback = null;
     }
 
-    /// <summary>
-    /// Creates one button for each possible definition (¡°Organic,¡± ¡°Cellular,¡± ¡°Genetic¡±).
-    /// </summary>
-    private void PopulateDefinitionOptions(OrganCard card)
+    public void OnCellularOptionClicked()
     {
-        // 1) Clear old buttons
-        foreach (var btn in currentOptionButtons)
-            Destroy(btn);
-        currentOptionButtons.Clear();
-
-        // 2) Get the three possible definition©\strings
-       // string[] allDefs = OrganCard.AllPossibleDefinitions();
-
-        // 3) Instantiate one row per definition
-        //foreach (string defText in allDefs)
-        //{
-        //    GameObject row = Instantiate(definitionOptionPrefab, selector, false);
-        //    row.SetActive(true);
-
-        //    // Set the TMP_Text child to defText
-        //    TMP_Text lbl = row.GetComponentInChildren<TMP_Text>();
-        //    if (lbl != null) lbl.text = defText;
-
-        //    // Wire up the Button so that clicking it sets this card¡¯s type and notifies externally
-        //    Button btn = row.GetComponentInChildren<Button>();
-        //    if (btn != null)
-        //    {
-        //        btn.onClick.AddListener(() =>
-        //        {
-        //            OnDefinitionChosen(defText);
-        //        });
-        //    }
-
-        //    currentOptionButtons.Add(row);
-        //}
+        selectedType = OrganType.Cellular;
+        btnCellular.ForceSelect();
     }
 
-    /// <summary>
-    /// Called when the player picks one of the definitions in the bottom panel.
-    /// Updates the OrganCard¡¯s type, the CurrentDef text, the highlight, and
-    /// invokes the external callback so the top panel updates its label.
-    /// </summary>
-    private void OnDefinitionChosen(string chosenDef)
+    public void OnGeneticOptionClicked()
+    {
+        selectedType = OrganType.Genetic;
+        btnGenetic.ForceSelect();
+    }
+
+    public void OnOrganicOptionClicked()
+    {
+        selectedType = OrganType.Organic;
+        btnOrganic.ForceSelect();
+    }
+
+    public void OnRevertClicked()
     {
         if (previewedCard == null) return;
 
-        // 1) Update the OrganCard¡¯s type
-      //  previewedCard.AssignDefinition(chosenDef);
-
-        // 2) Update the CurrentDef label
-        CurrentDef.text = chosenDef;
-
-        // 3) Move highlight under the chosen row
-        MoveHighlightTo(chosenDef);
-
-        // 4) If the top©\panel passed us a callback, call it with newDef
-        OnDefinitionChangedExternally?.Invoke(chosenDef);
-    }
-
-    /// <summary>
-    /// Moves the SelectHighlight so it overlaps the definition©\option row whose label == defText.
-    /// </summary>
-    private void MoveHighlightTo(string defText)
-    {
-        RectTransform highlightRT = SelectHighlight.rectTransform;
-
-        for (int i = 0; i < currentOptionButtons.Count; i++)
-        {
-            TMP_Text lbl = currentOptionButtons[i].GetComponentInChildren<TMP_Text>();
-            if (lbl != null && lbl.text == defText)
-            {
-                RectTransform optionRT = currentOptionButtons[i].GetComponent<RectTransform>();
-
-                // Reparent the highlight to the same parent (selector) so coordinates match
-                highlightRT.SetParent(optionRT.parent, false);
-
-                // Copy the anchoredPosition & sizeDelta
-                highlightRT.anchoredPosition = optionRT.anchoredPosition;
-                highlightRT.sizeDelta = optionRT.sizeDelta;
-                return;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Call this (e.g. from a ¡°Revert¡± button somewhere under DefinePanel)
-    /// to restore the card¡¯s original definition.
-    /// </summary>
-    public void RevertDefinition()
-    {
-        if (previewedCard == null) return;
-
-        // 1) Restore OrganCard¡¯s type
+        // Revert inside the card itself
         previewedCard.RevertToOriginal();
+        OrganType orig = previewedCard.curType;
+        CurrentDef.text = orig.ToString();
+        selectedType = orig;
 
-        // 2) Update CurrentDef text
-        CurrentDef.text = previewedCard.GetDefinition();
+        // Update visuals
+        btnCellular.ForceDeselect();
+        btnGenetic.ForceDeselect();
+        btnOrganic.ForceDeselect();
+        if (orig == OrganType.Cellular) btnCellular.ForceSelect();
+        else if (orig == OrganType.Genetic) btnGenetic.ForceSelect();
+        else if (orig == OrganType.Organic) btnOrganic.ForceSelect();
 
-        // 3) Move highlight back to original
-        MoveHighlightTo(previewedCard.GetDefinition());
+        onTopPanelUpdateCallback?.Invoke(orig.ToString());
+    }
 
-        // 4) Fire the external callback so the top panel¡¯s label also reverts
-        OnDefinitionChangedExternally?.Invoke(previewedCard.GetDefinition());
+    public void OnRedefineClicked()
+    {
+        if (previewedCard == null) return;
+
+        // Assign the chosen type inside the card
+        previewedCard.AssignDefinition(selectedType);
+        CurrentDef.text = selectedType.ToString();
+
+        // Force©\select for visuals
+        btnCellular.ForceDeselect();
+        btnGenetic.ForceDeselect();
+        btnOrganic.ForceDeselect();
+        if (selectedType == OrganType.Cellular) btnCellular.ForceSelect();
+        else if (selectedType == OrganType.Genetic) btnGenetic.ForceSelect();
+        else if (selectedType == OrganType.Organic) btnOrganic.ForceSelect();
+
+        onTopPanelUpdateCallback?.Invoke(selectedType.ToString());
     }
 }
