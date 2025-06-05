@@ -12,10 +12,9 @@ public class DefinePanelController : MonoBehaviour
     public HighlightButtonComponent btnOrganic;
     public Button RevertButton;
     public Button RedefineButton;
+    public Transform previewPanel;
 
     public Text CurrentDef;
-    public TMP_Text name;
-
     // Internals
     private OrganCard previewedCard;
     private OrganType? selectedType;
@@ -36,6 +35,7 @@ public class DefinePanelController : MonoBehaviour
         ClearPanelState();
     }
 
+
     public void ShowCardDetails(OrganCard card, System.Action<string> topPanelCallback)
     {
         previewedCard = card;
@@ -47,13 +47,14 @@ public class DefinePanelController : MonoBehaviour
 
         // Update text display
         CurrentDef.text = current.ToString();
-        name.text = card.organName;
 
         ChangeSelectedButton(current);
 
         // Enable control buttons
         RevertButton.interactable = true;
         RedefineButton.interactable = true;
+
+        PreviewHelper.ShowPreview(card.organPrefab);
     }
 
     public void ClearPanelState()
@@ -69,6 +70,8 @@ public class DefinePanelController : MonoBehaviour
         btnOrganic.ForceDeselect();
 
         onTopPanelUpdateCallback = null;
+
+        PreviewHelper.ClearPreview();
     }
 
     private void ChangeSelectedButton(OrganType newType)
