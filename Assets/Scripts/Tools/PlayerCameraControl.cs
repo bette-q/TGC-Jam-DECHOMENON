@@ -3,25 +3,15 @@ using UnityEngine.EventSystems;
 
 public class PlayerCameraControl : MonoBehaviour
 {
-    [Header("Assign in Inspector")]
-    [Tooltip("The Camera that renders the preview. Should be set to cull only the preview layer.")]
     public Camera viewCamera;
-
-    [Tooltip("The root Transform of the instantiated preview model.")]
     public Transform viewRoot;
 
     [Header("Rotation Settings")]
-    [Tooltip("Degrees per second when dragging right mouse button.")]
     public float rotationSpeed = 200f;
 
     [Header("Zoom Settings")]
-    [Tooltip("How quickly the camera moves in/out on scroll.")]
     public float zoomSpeed = 5f;
-
-    [Tooltip("Minimum allowed distance from camera to viewRoot.")]
     public float minDistance = 0.5f;
-
-    [Tooltip("Maximum allowed distance from camera to viewRoot.")]
     public float maxDistance = 20.0f;
 
     private Vector3 _lastMousePosition;

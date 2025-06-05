@@ -1,4 +1,3 @@
-// PreviewHelper.cs
 using UnityEngine;
 
 public static class PreviewHelper
@@ -20,9 +19,6 @@ public static class PreviewHelper
         }
     }
 
-    /// <summary>
-    /// Destroys any existing preview objects (both root and instance).
-    /// </summary>
     public static void ClearPreview()
     {
         if (_currentRoot != null)
@@ -33,11 +29,6 @@ public static class PreviewHelper
         }
     }
 
-    /// <summary>
-    /// Instantiates 'prefab' under a new empty ¡°preview root¡± at world (0,0,0),
-    /// sets the layer on the root and all children, and returns the root so
-    /// you can pass it to PreviewInteraction (for rotation/zoom).
-    /// </summary>
     public static GameObject ShowPreview(GameObject prefab)
     {
         ClearPreview();
