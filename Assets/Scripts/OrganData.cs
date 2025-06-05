@@ -12,7 +12,8 @@ public class OrganCard
 {
     public GameObject organPrefab;
     public string organName;
-    public OrganType type;
+    public OrganType curType;
+    private OrganType originalType;
 
     public OrganCard(GameObject prefab)
     {
@@ -22,13 +23,21 @@ public class OrganCard
     }
     public void AssignRandomType()
     {
-        type = (OrganType)Random.Range(0, 3);
+        curType = (OrganType)Random.Range(0, 3);
+        originalType = curType;
     }
     public string GetDefinition()
     {
-        return type.ToString();
+        return curType.ToString();
     }
-
+    public void RevertToOriginal()
+    {
+        curType = originalType;
+    }
+    public void AssignDefinition(OrganType typeIn)
+    {
+        curType = typeIn;
+    }
 
 }
 

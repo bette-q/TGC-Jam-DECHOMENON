@@ -8998,7 +8998,7 @@ GameObject:
   - component: {fileID: 2962718664082591983}
   - component: {fileID: 4850163375391436583}
   m_Layer: 0
-  m_Name: figma-importer
+  m_Name: UIPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

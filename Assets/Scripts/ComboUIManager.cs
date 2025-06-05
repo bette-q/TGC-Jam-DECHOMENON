@@ -214,10 +214,10 @@ public class ComboUIManager : MonoBehaviour
         }
 
         // Green combo = Cellular root, all Genetic conductors, Organic terminal
-        bool conductorsOK = conductorCards.Count > 0 && conductorCards.TrueForAll(c => c.type == OrganType.Genetic);
+        bool conductorsOK = conductorCards.Count > 0 && conductorCards.TrueForAll(c => c.curType == OrganType.Genetic);
 
-        isGreen = (rootCard.type == OrganType.Cellular) && 
-                  (terminalCard.type == OrganType.Organic) && 
+        isGreen = (rootCard.curType == OrganType.Cellular) && 
+                  (terminalCard.curType == OrganType.Organic) && 
                   conductorsOK;
 
         if (!isGreen && !isAwaitingRedConfirmation)
