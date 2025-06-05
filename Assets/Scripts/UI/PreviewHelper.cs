@@ -6,9 +6,10 @@ public static class PreviewHelper
     private const string PreviewLayerName = "PreviewLayer";
     private static int _previewLayer = -1;
 
+    // Keep track of both the root and the actual mesh instance
+    private static GameObject _currentRoot;
     private static GameObject _currentInstance;
 
-    // get the layer index
     private static int PreviewLayer
     {
         get
@@ -18,33 +19,50 @@ public static class PreviewHelper
             return _previewLayer;
         }
     }
+
+    /// <summary>
+    /// Destroys any existing preview objects (both root and instance).
+    /// </summary>
     public static void ClearPreview()
     {
-        if (_currentInstance != null)
+        if (_currentRoot != null)
         {
-            Object.Destroy(_currentInstance);
+            Object.Destroy(_currentRoot);
+            _currentRoot = null;
             _currentInstance = null;
         }
     }
 
     /// <summary>
-    /// Instantiates 'prefab' at world-space origin, puts it (and children) on PreviewLayer,
-    /// and stores it so we can clear it later.
+    /// Instantiates 'prefab' under a new empty ¡°preview root¡± at world (0,0,0),
+    /// sets the layer on the root and all children, and returns the root so
+    /// you can pass it to PreviewInteraction (for rotation/zoom).
     /// </summary>
-    public static void ShowPreview(GameObject prefab)
+    public static GameObject ShowPreview(GameObject prefab)
     {
         ClearPreview();
-        if (prefab == null) return;
+        if (prefab == null) return null;
 
-        GameObject go = Object.Instantiate(prefab);
+        // 1) Create an empty root at world origin
+        _currentRoot = new GameObject("PreviewRoot");
+        _currentRoot.transform.position = Vector3.zero;
+        _currentRoot.transform.rotation = Quaternion.identity;
+        _currentRoot.transform.localScale = Vector3.one;
+
+        // 2) Instantiate the actual prefab as a child of that root
+        GameObject go = Object.Instantiate(prefab, _currentRoot.transform, worldPositionStays: false);
         _currentInstance = go;
 
-        int layer = PreviewLayer;
-        SetLayerRecursive(go, layer);
+        // 3) Set the root (and therefore go & all children) to PreviewLayer
+        SetLayerRecursive(_currentRoot, PreviewLayer);
 
-        go.transform.position = Vector3.zero;
-        go.transform.rotation = Quaternion.identity;
+        // 4) Reset the child¡¯s local transform so it¡¯s centered under the root
+        go.transform.localPosition = Vector3.zero;
+        go.transform.localRotation = Quaternion.identity;
         go.transform.localScale = Vector3.one;
+
+        // Return the root to whoever called this
+        return _currentRoot;
     }
 
     private static void SetLayerRecursive(GameObject obj, int newLayer)

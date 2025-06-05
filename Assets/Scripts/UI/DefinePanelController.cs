@@ -15,12 +15,16 @@ public class DefinePanelController : MonoBehaviour
     public Transform previewPanel;
 
     public Text CurrentDef;
+    public PlayerCameraControl playerCameraControl;
+
     // Internals
     private OrganCard previewedCard;
     private OrganType? selectedType;
     private System.Action<string> onTopPanelUpdateCallback;
 
     private Dictionary<OrganType, HighlightButtonComponent> buttonMap;
+
+    private GameObject curPreviewRoot;
 
 
     void Awake()
@@ -55,6 +59,15 @@ public class DefinePanelController : MonoBehaviour
         RedefineButton.interactable = true;
 
         PreviewHelper.ShowPreview(card.organPrefab);
+
+        // Instantiate the model under a preview root, and capture that root
+        curPreviewRoot = PreviewHelper.ShowPreview(card.organPrefab);
+
+        // Assign the previewRoot to the interaction script so the user can rotate/zoom it
+        if (playerCameraControl != null && curPreviewRoot != null)
+        {
+            playerCameraControl.viewRoot = curPreviewRoot.transform;
+        }
     }
 
     public void ClearPanelState()
@@ -71,7 +84,13 @@ public class DefinePanelController : MonoBehaviour
 
         onTopPanelUpdateCallback = null;
 
+        // Clear the preview
         PreviewHelper.ClearPreview();
+        if (playerCameraControl != null)
+        {
+            playerCameraControl.viewRoot = null;
+        }
+        curPreviewRoot = null;
     }
 
     private void ChangeSelectedButton(OrganType newType)
