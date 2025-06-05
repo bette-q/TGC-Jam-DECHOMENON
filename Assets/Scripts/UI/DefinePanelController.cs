@@ -2,9 +2,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 public class DefinePanelController : MonoBehaviour
 {
+    //Hook ups
     public HighlightButtonComponent btnCellular;
     public HighlightButtonComponent btnGenetic;
     public HighlightButtonComponent btnOrganic;
@@ -12,14 +14,25 @@ public class DefinePanelController : MonoBehaviour
     public Button RedefineButton;
 
     public Text CurrentDef;
+    public TMP_Text name;
 
     // Internals
     private OrganCard previewedCard;
-    private OrganType selectedType;
+    private OrganType? selectedType;
     private System.Action<string> onTopPanelUpdateCallback;
+
+    private Dictionary<OrganType, HighlightButtonComponent> buttonMap;
+
 
     void Awake()
     {
+        buttonMap = new Dictionary<OrganType, HighlightButtonComponent>
+        {
+            { OrganType.Cellular, btnCellular },
+            { OrganType.Genetic,  btnGenetic  },
+            { OrganType.Organic,  btnOrganic  }
+        };
+
         ClearPanelState();
     }
 
@@ -34,16 +47,9 @@ public class DefinePanelController : MonoBehaviour
 
         // Update text display
         CurrentDef.text = current.ToString();
+        name.text = card.organName;
 
-        // Deselect all option buttons first
-        btnCellular.ForceDeselect();
-        btnGenetic.ForceDeselect();
-        btnOrganic.ForceDeselect();
-
-        // Force©\select the matching option by enum
-        if (current == OrganType.Cellular) btnCellular.ForceSelect();
-        else if (current == OrganType.Genetic) btnGenetic.ForceSelect();
-        else if (current == OrganType.Organic) btnOrganic.ForceSelect();
+        ChangeSelectedButton(current);
 
         // Enable control buttons
         RevertButton.interactable = true;
@@ -65,22 +71,40 @@ public class DefinePanelController : MonoBehaviour
         onTopPanelUpdateCallback = null;
     }
 
+    private void ChangeSelectedButton(OrganType newType)
+    {
+        // If there was a previously selected button, deselect it
+        if (selectedType.HasValue &&
+            buttonMap.TryGetValue(selectedType.Value, out var prevBtn))
+        {
+            prevBtn.ForceDeselect();
+        }
+
+        // Select the new button
+        if (buttonMap.TryGetValue(newType, out var newBtn))
+        {
+            newBtn.ForceSelect();
+            selectedType = newType;
+        }
+        else
+        {
+            selectedType = null;
+        }
+    }
+
     public void OnCellularOptionClicked()
     {
-        selectedType = OrganType.Cellular;
-        btnCellular.ForceSelect();
+        ChangeSelectedButton(OrganType.Cellular);
     }
 
     public void OnGeneticOptionClicked()
     {
-        selectedType = OrganType.Genetic;
-        btnGenetic.ForceSelect();
+        ChangeSelectedButton(OrganType.Genetic);
     }
 
     public void OnOrganicOptionClicked()
     {
-        selectedType = OrganType.Organic;
-        btnOrganic.ForceSelect();
+        ChangeSelectedButton(OrganType.Organic);
     }
 
     public void OnRevertClicked()
@@ -94,12 +118,7 @@ public class DefinePanelController : MonoBehaviour
         selectedType = orig;
 
         // Update visuals
-        btnCellular.ForceDeselect();
-        btnGenetic.ForceDeselect();
-        btnOrganic.ForceDeselect();
-        if (orig == OrganType.Cellular) btnCellular.ForceSelect();
-        else if (orig == OrganType.Genetic) btnGenetic.ForceSelect();
-        else if (orig == OrganType.Organic) btnOrganic.ForceSelect();
+        ChangeSelectedButton(orig);
 
         onTopPanelUpdateCallback?.Invoke(orig.ToString());
     }
@@ -109,16 +128,11 @@ public class DefinePanelController : MonoBehaviour
         if (previewedCard == null) return;
 
         // Assign the chosen type inside the card
-        previewedCard.AssignDefinition(selectedType);
+        previewedCard.AssignDefinition(selectedType.Value);
         CurrentDef.text = selectedType.ToString();
 
-        // Force©\select for visuals
-        btnCellular.ForceDeselect();
-        btnGenetic.ForceDeselect();
-        btnOrganic.ForceDeselect();
-        if (selectedType == OrganType.Cellular) btnCellular.ForceSelect();
-        else if (selectedType == OrganType.Genetic) btnGenetic.ForceSelect();
-        else if (selectedType == OrganType.Organic) btnOrganic.ForceSelect();
+        //update visuals
+        ChangeSelectedButton(selectedType.Value);
 
         onTopPanelUpdateCallback?.Invoke(selectedType.ToString());
     }
