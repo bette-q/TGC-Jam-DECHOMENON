@@ -29,24 +29,6 @@ public class DraggableCard : MonoBehaviour,
         _originalScale = transform.localScale;
     }
 
-    public void ReturnToHome()
-    {
-        if (homeParent == null)
-        {
-            Debug.LogWarning($"{name} has no homeParent¡ªcannot return home.");
-            return;
-        }
-
-        transform.SetParent(homeParent, worldPositionStays: false);
-
-        //RectTransform rt = GetComponent<RectTransform>();
-        //rt.anchoredPosition = Vector2.zero;
-        transform.localRotation = Quaternion.identity;
-        transform.localScale = _originalScale;
-
-        transform.SetSiblingIndex(homeSiblingIndex);
-    }
-
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (_rootCanvas == null) return;
@@ -121,5 +103,15 @@ public class DraggableCard : MonoBehaviour,
             ReturnToHome();
         }
         // Otherwise, CardDropSlot.OnDrop reparented it and set the new slot¡¯s reference already
+    }
+
+    public void ReturnToHome()
+    {
+        transform.SetParent(homeParent, worldPositionStays: false);
+
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = _originalScale;
+
+        transform.SetSiblingIndex(homeSiblingIndex);
     }
 }
