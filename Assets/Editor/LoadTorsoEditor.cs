@@ -1,4 +1,4 @@
-using UnityEditor;
+/*using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(FBXSocketLoader))]
@@ -79,3 +79,4 @@ public class FBXSocketLoaderEditor : Editor
         }
     }
 }
+*/

@@ -1,63 +1,64 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class FBXSocketLoader : MonoBehaviour
+/// <summary>
+/// Utility functions to extract ¡°socket¡± transforms from a prefab or instantiated GameObject,
+/// based on naming conventions (e.g. any child whose name contains ¡°Socket_¡± is a torso socket,
+/// and the single child named ¡°SocketHead¡± inside an organ prefab is its attachment point).
+/// </summary>
+public static class SocketParser
 {
-    public GameObject fbxPrefab;     // Assign your FBX prefab here
-    public Transform torsoParent;    // Assign the Torso GameObject in the scene
-
-    /*[ContextMenu("Load Sockets From FBX")]
-    void LoadSockets()
+    /// <summary>
+    /// Given a torso prefab (not yet instantiated), find all child paths whose names contain "Socket_".
+    /// You cannot read Transform hierarchy directly from the asset, so you must instantiate it (inactive)
+    /// or use PrefabUtility if in Editor. Here we do a runtime instantiate under a temporary parent.
+    /// </summary>
+    public static List<Transform> GetTorsoSockets(GameObject torsoPrefab)
     {
-        if (fbxPrefab == null || torsoParent == null)
+        var sockets = new List<Transform>();
+        if (torsoPrefab == null) return sockets;
+
+        // 1) Instantiate the torso off-screen (set inactive so Start/Awake/etc. don¡¯t run scripts)
+        GameObject temp = Object.Instantiate(torsoPrefab);
+        temp.SetActive(false);
+
+        // 2) Walk the hierarchy looking for any Transform whose name contains "Socket_"
+        foreach (var t in temp.GetComponentsInChildren<Transform>(includeInactive: true))
         {
-            Debug.LogError("Please assign both FBX prefab and Torso parent.");
-            return;
-        }
-
-        GameObject fbxInstance = Instantiate(fbxPrefab);
-        Transform defSpine = FindChildByName(fbxInstance.transform, "def_spine");
-
-        if (defSpine == null)
-        {
-            Debug.LogError("def_spine not found.");
-            DestroyImmediate(fbxInstance);
-            return;
-        }
-
-        int count = 0;
-
-        foreach (Transform child in defSpine)
-        {
-            if (child.name.StartsWith("torso_socket_"))
+            if (t.name.Contains("Socket_"))
             {
-                // Create new Socket GameObject
-                GameObject socketGO = new GameObject($"Socket{count}");
-                socketGO.transform.SetParent(torsoParent, false);
-                socketGO.transform.position = child.position;
-                socketGO.transform.rotation = child.rotation;
-
-                // Add Anchor child
-                GameObject anchorGO = new GameObject("Anchor");
-                anchorGO.transform.SetParent(socketGO.transform, false);
-                anchorGO.transform.localPosition = Vector3.zero;
-                anchorGO.transform.localRotation = Quaternion.identity;
-
-                count++;
+                sockets.Add(t);
             }
         }
 
-        DestroyImmediate(fbxInstance);
-        Debug.Log($"Imported {count} sockets into Torso.");
+        // 3) Destroy the temporary instance
+        Object.Destroy(temp);
+
+        return sockets;
     }
 
-    Transform FindChildByName(Transform parent, string name)
+    /// <summary>
+    /// Given an organ prefab, find the child Transform named exactly ¡°SocketHead¡±.
+    /// If not found, returns null.
+    /// </summary>
+    public static Transform GetOrganSocketHead(GameObject organPrefab)
     {
-        foreach (Transform child in parent)
+        if (organPrefab == null) return null;
+
+        GameObject temp = Object.Instantiate(organPrefab);
+        temp.SetActive(false);
+
+        Transform found = null;
+        foreach (var t in temp.GetComponentsInChildren<Transform>(includeInactive: true))
         {
-            if (child.name == name) return child;
-            var result = FindChildByName(child, name);
-            if (result != null) return result;
+            if (t.name.Equals("SocketHead"))
+            {
+                found = t;
+                break;
+            }
         }
-        return null;
-    }*/
+
+        Object.Destroy(temp);
+        return found;
+    }
 }

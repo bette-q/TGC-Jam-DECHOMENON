@@ -1,71 +1,112 @@
 ﻿using System.Collections.Generic;
-using System.Net.Sockets;
-using Unity.Burst.Intrinsics;
 using UnityEngine;
 
-
-//add a middle layer between socket and organs
 [System.Serializable]
-public class SocketBinding 
+public class SocketBinding
 {
-    public Transform socket;       // e.g. socket0
-    public Transform comboAnchor;  // child of socket0
+    public string socketName;       // e.g. “Socket_ArmLeft”
+    public string comboAnchorName;  // e.g. “ComboAnchor_ArmLeft”
+    [HideInInspector] public Transform socket;       // actual Transform under instantiated torso
+    [HideInInspector] public Transform comboAnchor;  // actual child under that socket
 }
 
 public class SocketManager : MonoBehaviour
 {
-    public Transform torsoRoot;
-    public List<SocketBinding> sockets;
+    [Tooltip("List all socket names + anchor names here (matches children under the torso prefab).")]
+    public List<SocketBinding> sockets = new List<SocketBinding>();
+
     [SerializeField] int greenSocketCt = 3;
 
-    //track socket status
+    private Transform torsoRoot;   // set by ViewHelper
+
     private Dictionary<int, GameObject> attached = new Dictionary<int, GameObject>();
+
+    public void SetTorso(Transform torso)
+    {
+        torsoRoot = torso;
+    }
+
+    /// <summary>
+    /// Call this immediately after SetTorso—will re‐assign each
+    /// SocketBinding.socket & comboAnchor to the live instance’s children.
+    /// </summary>
+    public void BindSocketsToInstance()
+    {
+        if (torsoRoot == null)
+        {
+            Debug.LogError("SocketManager.BindSocketsToInstance: torsoRoot is null.");
+            return;
+        }
+
+        for (int i = 0; i < sockets.Count; i++)
+        {
+            var sb = sockets[i];
+
+            // Find the socket Transform under the instantiated torso by name
+            Transform foundSocket = torsoRoot.Find(sb.socketName);
+            if (foundSocket == null)
+            {
+                Debug.LogError($"SocketManager: Could not find child '{sb.socketName}' under torso.");
+                continue;
+            }
+
+            sb.socket = foundSocket;
+
+            // Now find the comboAnchor under that socket by name
+            Transform foundAnchor = foundSocket.Find(sb.comboAnchorName);
+            if (foundAnchor == null)
+            {
+                Debug.LogError($"SocketManager: Could not find comboAnchor '{sb.comboAnchorName}' as child of '{sb.socketName}'.");
+                continue;
+            }
+
+            sb.comboAnchor = foundAnchor;
+
+            // Write back into the list
+            sockets[i] = sb;
+        }
+    }
 
     private void AttachBodyPart(int socketIdx, GameObject organRoot)
     {
         Debug.Assert(socketIdx >= 0 && socketIdx < sockets.Count,
                      $"Invalid socketIdx: {socketIdx}");
 
-        /* -----------------------------------------------------------
-            1.  Remove any part already on this socket
-        -----------------------------------------------------------*/
         if (attached.TryGetValue(socketIdx, out var oldPart))
         {
             Destroy(oldPart);
             attached.Remove(socketIdx);
         }
 
-        Transform attachPoint = sockets[socketIdx].comboAnchor;
+        var sb = sockets[socketIdx];
+        if (sb.comboAnchor == null)
+        {
+            Debug.LogError($"SocketManager: comboAnchor is null for socket index {socketIdx}.");
+            return;
+        }
 
-        //find root sockethead
+        Transform attachPoint = sb.comboAnchor;
+
+        // Find the organ’s internal "SocketHead" (as before)
         Transform inputSocket = organRoot.transform.GetChild(0).Find("SocketHead");
 
         if (inputSocket == null)
         {
-            // No marker found – simple snap & parent
             organRoot.transform.SetPositionAndRotation(attachPoint.position,
                                                        attachPoint.rotation);
         }
         else
         {
-            /* -------------------------------------------------------
-                 ROTATE   : make SocketHead's axes = attachPoint's axes
-            ---------------------------------------------------------*/
             Quaternion deltaRot = attachPoint.rotation * Quaternion.Inverse(inputSocket.rotation);
             organRoot.transform.rotation = deltaRot * organRoot.transform.rotation;
 
-            /* -------------------------------------------------------
-                 MOVE     : bring SocketHead's pivot to attachPoint
-            ---------------------------------------------------------*/
             Vector3 worldDelta = attachPoint.position - inputSocket.position;
             organRoot.transform.position += worldDelta;
         }
 
-        organRoot.transform.SetParent(attachPoint, true);
+        organRoot.transform.SetParent(attachPoint, worldPositionStays: true);
 
-        /* -----------------------------------------------------------
-            SCALE FIX  : ensure world-scale stays 1:1
-        -----------------------------------------------------------*/
+        // Fix scale
         Vector3 parentScale = attachPoint.lossyScale;
         Vector3 currentScale = organRoot.transform.lossyScale;
 
@@ -79,29 +120,12 @@ public class SocketManager : MonoBehaviour
         attached[socketIdx] = organRoot;
     }
 
-    //attach to random socket with green/red distinction
     public void AttachRandom(GameObject organRoot, bool isGreen)
     {
-
-        int socketIdx = isGreen ? Random.Range(0, greenSocketCt) : Random.Range(0, sockets.Count);
-
-        Debug.LogWarning("location: " + socketIdx + " prefab: " + organRoot.name);
-
+        int socketIdx = isGreen
+            ? Random.Range(0, Mathf.Min(greenSocketCt, sockets.Count))
+            : Random.Range(0, sockets.Count);
 
         AttachBodyPart(socketIdx, organRoot);
-
     }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-      
-    }
-
-
 }
