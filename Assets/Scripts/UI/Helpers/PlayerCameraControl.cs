@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -5,6 +6,7 @@ public class PlayerCameraControl : MonoBehaviour
 {
     public Camera viewCamera;
     public Transform viewRoot;
+    public List<RectTransform> interactiveRects;
 
     [Header("Rotation Settings")]
     public float rotationSpeed = 200f;
@@ -26,11 +28,14 @@ public class PlayerCameraControl : MonoBehaviour
 
     private void HandleRotation()
     {
-        // Begin dragging as soon as right mouse is pressed (no UI check)
-        if (Input.GetMouseButtonDown(1) && !IsPointerOverUIButton())
+
+        if (Input.GetMouseButtonDown(1))
         {
-            _isDragging = true;
-            _lastMousePosition = Input.mousePosition;
+            if (IsMouseOverAnyPanel() && !IsPointerOverUIButton())
+            {
+                _isDragging = true;
+                _lastMousePosition = Input.mousePosition;
+            }
         }
         // Stop dragging when right mouse is released
         if (Input.GetMouseButtonUp(1))
@@ -57,6 +62,12 @@ public class PlayerCameraControl : MonoBehaviour
     private void HandleZoom()
     {
         if (viewCamera == null || viewRoot == null) return;
+
+        if (!IsMouseOverAnyPanel())
+            return;
+
+        if (IsPointerOverUIButton())
+            return;
 
         // Get scroll input
         float scroll = Input.GetAxis("Mouse ScrollWheel");
@@ -105,5 +116,36 @@ public class PlayerCameraControl : MonoBehaviour
                 return true;
         }
         return false;
+    }
+
+    private bool IsMouseOverAnyPanel()
+    {
+        // We need to consider Screen Space ¨C Overlay vs. Screen Space ¨C Camera:
+        // If your Canvas is Screen Space ¨C Camera, pass canvas.worldCamera into ScreenPointToLocalPointInRectangle.
+        foreach (var rect in interactiveRects)
+        {
+            if (IsMouseOverRect(rect))
+                return true;
+        }
+        return false;
+    }
+
+    private bool IsMouseOverRect(RectTransform rt)
+    {
+        // Determine which camera to use for UI screenspace:
+        Canvas canvas = rt.GetComponentInParent<Canvas>();
+        Camera uiCam = null;
+        if (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceCamera)
+            uiCam = canvas.worldCamera;
+
+        Vector2 localPoint;
+        bool inside = RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            rt,
+            Input.mousePosition,
+            uiCam,
+            out localPoint
+        ) && rt.rect.Contains(localPoint);
+
+        return inside;
     }
 }

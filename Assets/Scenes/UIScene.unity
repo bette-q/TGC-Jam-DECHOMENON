@@ -1397,6 +1397,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewCamera: {fileID: 1153930975}
   viewRoot: {fileID: 0}
+  interactiveRects:
+  - {fileID: 1233003153}
+  - {fileID: 1702943041}
   rotationSpeed: 100
   zoomSpeed: 5
   minDistance: 1
@@ -5283,6 +5286,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewCamera: {fileID: 928857563}
   viewRoot: {fileID: 0}
+  interactiveRects:
+  - {fileID: 2093133587}
   rotationSpeed: 100
   zoomSpeed: 5
   minDistance: 0.5
