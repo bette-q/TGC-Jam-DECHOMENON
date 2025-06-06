@@ -11,6 +11,9 @@ public class CardDropSlot : MonoBehaviour, IDropHandler
     [HideInInspector]
     public DraggableCard containedDraggable = null;
 
+    public delegate void SlotChangedHandler(int slotIndex, DraggableCard newCard);
+    public event SlotChangedHandler OnSlotChanged;
+
     private Vector2 _cachedSlotSize;
 
     private void Awake()
@@ -55,11 +58,15 @@ public class CardDropSlot : MonoBehaviour, IDropHandler
 
 
         containedDraggable = draggable;
+
+        OnSlotChanged?.Invoke(slotIndex, containedDraggable);
     }
 
     public void RemoveDraggableReference()
     {
         containedDraggable = null;
+
+        OnSlotChanged?.Invoke(slotIndex, null);
     }
 
     public void ClearSlot()
@@ -68,6 +75,8 @@ public class CardDropSlot : MonoBehaviour, IDropHandler
         {
             containedDraggable.ReturnToHome();
             containedDraggable = null;
+
+            OnSlotChanged?.Invoke(slotIndex, null);
         }
     }
 }

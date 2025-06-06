@@ -43,6 +43,8 @@ public class PanelSwitcher : MonoBehaviour
 
         if (_defineHighlight != null)
             _defineHighlight.ForceSelect();
+
+        PreviewHelper.ClearPreview();
     }
 
     private void ShowConstruct()
@@ -52,6 +54,8 @@ public class PanelSwitcher : MonoBehaviour
 
         if (_constructHighlight != null)
             _constructHighlight.ForceSelect();
+        
+        PreviewHelper.ClearPreview();
     }
 
     private void OnDestroy()

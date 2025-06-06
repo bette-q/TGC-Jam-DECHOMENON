@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static CardDropSlot;
 
 public class ConstructPanelController : MonoBehaviour
 {
@@ -14,12 +15,51 @@ public class ConstructPanelController : MonoBehaviour
     [Header("Combo System")]
     public ComboManager comboManager;
 
+    [Header("Preview")]
+    public PlayerCameraControl playerCameraControl;
+    private GameObject _currentPreviewRoot = null;
+
     // Track if we've already warned about a red combo
     private bool waitingForRedConfirmation = false;
 
     private void Start()
     {
         inputButton.onClick.AddListener(OnInputClicked);
+
+        //hook up preview callback
+        foreach (var slot in slots)
+        {
+            slot.OnSlotChanged += OnSlotChangedHandler;
+        }
+    }
+
+    private void OnSlotChangedHandler(int slotIndex, DraggableCard newCard)
+    {
+        // If a card was dropped into this slot:
+        if (newCard != null && newCard.organCard != null)
+        {
+            // Clear any previous preview
+            PreviewHelper.ClearPreview();
+
+            // Show the new prefab under the same preview camera
+            _currentPreviewRoot = PreviewHelper.ShowPreview(newCard.organCard.organPrefab);
+
+            // Tell the camera control what to rotate/zoom
+            if (playerCameraControl != null && _currentPreviewRoot != null)
+            {
+                playerCameraControl.viewRoot = _currentPreviewRoot.transform;
+            }
+        }
+        else
+        {
+            // Slot emptied or card removed: clear the preview
+            PreviewHelper.ClearPreview();
+            if (playerCameraControl != null)
+            {
+                playerCameraControl.viewRoot = null;
+            }
+            _currentPreviewRoot = null;
+        }
     }
 
     private void OnInputClicked()
@@ -94,5 +134,11 @@ public class ConstructPanelController : MonoBehaviour
         {
             slot.ClearSlot();
         }
+
+        PreviewHelper.ClearPreview();
+        if (playerCameraControl != null)
+            playerCameraControl.viewRoot = null;
+        _currentPreviewRoot = null;
     }
+
 }
