@@ -11,6 +11,10 @@ public class PanelSwitcher : MonoBehaviour
     public GameObject definePanel;
     public GameObject constructPanel;
 
+    public ViewHelper viewHelper;
+
+
+
     private HighlightButtonComponent _defineHighlight;
     private HighlightButtonComponent _constructHighlight;
 
@@ -44,7 +48,7 @@ public class PanelSwitcher : MonoBehaviour
         if (_defineHighlight != null)
             _defineHighlight.ForceSelect();
 
-        PreviewHelper.ClearPreview();
+        viewHelper.ClearPreview();
     }
 
     private void ShowConstruct()
@@ -55,7 +59,7 @@ public class PanelSwitcher : MonoBehaviour
         if (_constructHighlight != null)
             _constructHighlight.ForceSelect();
         
-        PreviewHelper.ClearPreview();
+        viewHelper.ClearPreview();
     }
 
     private void OnDestroy()

@@ -15,8 +15,9 @@ public class ConstructPanelController : MonoBehaviour
     [Header("Combo System")]
     public ComboManager comboManager;
 
-    [Header("Preview")]
+    [Header("Preview Camera Setup")]
     public PlayerCameraControl playerCameraControl;
+    public ViewHelper viewHelper;
     private GameObject _currentPreviewRoot = null;
 
     // Track if we've already warned about a red combo
@@ -39,10 +40,10 @@ public class ConstructPanelController : MonoBehaviour
         if (newCard != null && newCard.organCard != null)
         {
             // Clear any previous preview
-            PreviewHelper.ClearPreview();
+            viewHelper.ClearPreview();
 
             // Show the new prefab under the same preview camera
-            _currentPreviewRoot = PreviewHelper.ShowPreview(newCard.organCard.organPrefab);
+            _currentPreviewRoot = viewHelper.ShowPreview(newCard.organCard.organPrefab);
 
             // Tell the camera control what to rotate/zoom
             if (playerCameraControl != null && _currentPreviewRoot != null)
@@ -53,7 +54,7 @@ public class ConstructPanelController : MonoBehaviour
         else
         {
             // Slot emptied or card removed: clear the preview
-            PreviewHelper.ClearPreview();
+            viewHelper.ClearPreview();
             if (playerCameraControl != null)
             {
                 playerCameraControl.viewRoot = null;
@@ -135,7 +136,7 @@ public class ConstructPanelController : MonoBehaviour
             slot.ClearSlot();
         }
 
-        PreviewHelper.ClearPreview();
+        viewHelper.ClearPreview();
         if (playerCameraControl != null)
             playerCameraControl.viewRoot = null;
         _currentPreviewRoot = null;

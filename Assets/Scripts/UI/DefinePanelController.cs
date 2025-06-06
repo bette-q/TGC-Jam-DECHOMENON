@@ -15,7 +15,11 @@ public class DefinePanelController : MonoBehaviour
     public Transform previewPanel;
 
     public Text CurrentDef;
+
+    [Header("Preview Camera Setup")]
     public PlayerCameraControl playerCameraControl;
+    public ViewHelper viewHelper;
+    private GameObject curPreviewRoot;
 
     // Internals
     private OrganCard previewedCard;
@@ -24,7 +28,6 @@ public class DefinePanelController : MonoBehaviour
 
     private Dictionary<OrganType, HighlightButtonComponent> buttonMap;
 
-    private GameObject curPreviewRoot;
 
 
     void Awake()
@@ -58,10 +61,10 @@ public class DefinePanelController : MonoBehaviour
         RevertButton.interactable = true;
         RedefineButton.interactable = true;
 
-        PreviewHelper.ShowPreview(card.organPrefab);
+        viewHelper.ShowPreview(card.organPrefab);
 
         // Instantiate the model under a preview root, and capture that root
-        curPreviewRoot = PreviewHelper.ShowPreview(card.organPrefab);
+        curPreviewRoot = viewHelper.ShowPreview(card.organPrefab);
 
         // Assign the previewRoot to the interaction script so the user can rotate/zoom it
         if (playerCameraControl != null && curPreviewRoot != null)
@@ -85,7 +88,7 @@ public class DefinePanelController : MonoBehaviour
         onTopPanelUpdateCallback = null;
 
         // Clear the preview
-        PreviewHelper.ClearPreview();
+        viewHelper.ClearPreview();
         if (playerCameraControl != null)
         {
             playerCameraControl.viewRoot = null;
