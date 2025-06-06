@@ -26,10 +26,6 @@ public class SocketManager : MonoBehaviour
         torsoRoot = torso;
     }
 
-    /// <summary>
-    /// Call this immediately after SetTorso—will re‐assign each
-    /// SocketBinding.socket & comboAnchor to the live instance’s children.
-    /// </summary>
     public void BindSocketsToInstance()
     {
         if (torsoRoot == null)

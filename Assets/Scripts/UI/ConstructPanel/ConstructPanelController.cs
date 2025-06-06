@@ -65,7 +65,7 @@ public class ConstructPanelController : MonoBehaviour
 
     private void OnInputClicked()
     {
-        if (slots[0] == null || slots[4] == null)
+        if (slots[0].containedDraggable == null || slots[4].containedDraggable == null)
         {
             infoText.text = "Missing key components";
             return;

@@ -90,6 +90,8 @@ public class ComboManager : MonoBehaviour
             previousOrgan = organInstance;
         }
 
+        LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
+
         socketManager.AttachRandom(comboRoot, isGreen);
     }
 }
