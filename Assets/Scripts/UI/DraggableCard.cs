@@ -2,58 +2,69 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-/// <summary>
-/// Attach this to your Card©\UI prefab.  
-/// Requires that the prefab be a child of a Canvas in Scene (so GetComponentInParent<Canvas>() finds something).
-/// The prefab should already have a CanvasGroup (for fade©\out on drag), an Image (so it¡¯s visible), and a Button (if you also use click).
-/// </summary>
 [RequireComponent(typeof(CanvasGroup), typeof(Image))]
 public class DraggableCard : MonoBehaviour,
     IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [HideInInspector]
-    public OrganCard organCard;
+    [HideInInspector] public OrganCard organCard;
+    [HideInInspector] public RectTransform homeParent;
+    [HideInInspector] public int homeSiblingIndex;
 
     private Canvas _rootCanvas;
     private RectTransform _dragGhost;
     private CanvasGroup _ghostCanvasGroup;
     private Transform _originalParent;
-    private int _originalSiblingIndex;
-
+    private CardDropSlot _originSlot;
     private CanvasGroup _selfCanvasGroup;
+    private Vector3 _originalScale;
 
     private void Awake()
     {
-        // Cache our own CanvasGroup (so we can hide the original on drag)
         _selfCanvasGroup = GetComponent<CanvasGroup>();
-
-        // Find the top©\level Canvas; if this card lives under multiple nested Canvases, this returns the nearest parent.
         _rootCanvas = GetComponentInParent<Canvas>();
         if (_rootCanvas == null)
+            Debug.LogError($"DraggableCard '{name}' has no parent Canvas. Dragging will fail.");
+
+        // Cache this card¡¯s scale in the pool
+        _originalScale = transform.localScale;
+    }
+
+    public void ReturnToHome()
+    {
+        if (homeParent == null)
         {
-            Debug.LogError($"DraggableCard: No Canvas found in parents of {name}. This will break dragging.");
+            Debug.LogWarning($"{name} has no homeParent¡ªcannot return home.");
+            return;
         }
+
+        transform.SetParent(homeParent, worldPositionStays: false);
+
+        //RectTransform rt = GetComponent<RectTransform>();
+        //rt.anchoredPosition = Vector2.zero;
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = _originalScale;
+
+        transform.SetSiblingIndex(homeSiblingIndex);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (_rootCanvas == null)
-        {
-            // Safeguard: if we don¡¯t have a Canvas, bail out.
-            return;
-        }
+        if (_rootCanvas == null) return;
 
-        // 1) Remember original parent so we can restore if dropped nowhere
+        // Remember original parent
         _originalParent = transform.parent;
-        _originalSiblingIndex = transform.GetSiblingIndex();
 
-        // 2) Create a new ghost copy under the root Canvas
-        //    We cast 'transform as RectTransform' because our card UI is a UI element.
+        // If that parent was a slot, clear its reference now
+        _originSlot = _originalParent.GetComponent<CardDropSlot>();
+        if (_originSlot != null)
+            _originSlot.RemoveDraggableReference();
+
+        // Create a ghost copy under the root Canvas
         _dragGhost = Instantiate(transform as RectTransform, _rootCanvas.transform);
         _dragGhost.name = "DragGhost_" + name;
         _dragGhost.sizeDelta = ((RectTransform)transform).sizeDelta;
 
-        // 3) Copy over image sprite (and text if you want¡ªbut usually the prefab¡¯s child texts already copy over)
+        // Copy Image visuals
         var srcImage = GetComponent<Image>();
         if (srcImage != null)
         {
@@ -65,16 +76,15 @@ public class DraggableCard : MonoBehaviour,
             }
         }
 
-        // 4) Ensure the ghost has a CanvasGroup so we can set alpha=0.8 and blocksRaycasts=false
+        // Ensure ghost has a CanvasGroup for alpha & raycasts
         _ghostCanvasGroup = _dragGhost.GetComponent<CanvasGroup>();
         if (_ghostCanvasGroup == null)
-        {
             _ghostCanvasGroup = _dragGhost.gameObject.AddComponent<CanvasGroup>();
-        }
+
         _ghostCanvasGroup.blocksRaycasts = false;
         _ghostCanvasGroup.alpha = 0.8f;
 
-        // 5) Hide the original so it looks ¡°picked up¡±
+        // Hide the original card while dragging
         _selfCanvasGroup.alpha = 0f;
         _selfCanvasGroup.blocksRaycasts = false;
     }
@@ -83,7 +93,6 @@ public class DraggableCard : MonoBehaviour,
     {
         if (_dragGhost == null || _rootCanvas == null) return;
 
-        // Move the ghost to follow the cursor
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             _rootCanvas.transform as RectTransform,
             eventData.position,
@@ -95,21 +104,22 @@ public class DraggableCard : MonoBehaviour,
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        // Destroy the ghost copy
+        // Destroy the ghost
         if (_dragGhost != null)
         {
             Destroy(_dragGhost.gameObject);
             _dragGhost = null;
         }
 
-        // Restore the original card¡¯s visibility and raycasts
+        // Restore original card¡¯s visibility
         _selfCanvasGroup.alpha = 1f;
         _selfCanvasGroup.blocksRaycasts = true;
 
-        // If the card never got reparented by a slot¡¯s OnDrop, put it back
+        // If the card wasn¡¯t dropped into a new slot, it remains under _originalParent
         if (transform.parent == _originalParent)
         {
-            transform.SetSiblingIndex(_originalSiblingIndex);
+            ReturnToHome();
         }
+        // Otherwise, CardDropSlot.OnDrop reparented it and set the new slot¡¯s reference already
     }
 }

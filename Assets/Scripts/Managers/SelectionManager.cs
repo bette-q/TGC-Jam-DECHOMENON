@@ -57,13 +57,13 @@ public class SelectionManager : MonoBehaviour
                     label.text = card.GetDefinition();
             }
 
-            //set up dragging for construct slots
+            //set up dragging for construct slots + stores original pos
             DraggableCard dragComp = btnGO.GetComponent<DraggableCard>();
             if (dragComp == null)
-            {
                 dragComp = btnGO.AddComponent<DraggableCard>();
-            }
             dragComp.organCard = card;
+            dragComp.homeParent = cardPanel;               
+            dragComp.homeSiblingIndex = btnGO.transform.GetSiblingIndex();
 
             Button cardBtn = btnGO.GetComponent<Button>();
             cardBtn.onClick.AddListener(() =>
