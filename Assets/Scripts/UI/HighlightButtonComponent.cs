@@ -3,20 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-/// <summary>
-/// Attach this to any Button that should swap its background sprite when clicked,
-/// and also swap the child text color for contrast.
-/// 
-/// Requires:
-///   • An Image component on the same GameObject (for the black/white‐box background).
-///   • A child TMP_Text (or legacy Text) to control the label color.
-/// 
-/// In the Inspector, assign:
-///   • normalSprite   (e.g. black‐box‐white‐outline)
-///   • selectedSprite (e.g. white‐box‐black‐outline)
-///   • normalTextColor = White
-///   • selectedTextColor = Black
-/// </summary>
 [RequireComponent(typeof(Button))]
 [RequireComponent(typeof(Image))]
 public class HighlightButtonComponent : MonoBehaviour, IPointerClickHandler
@@ -54,10 +40,6 @@ public class HighlightButtonComponent : MonoBehaviour, IPointerClickHandler
         SetToNormal();
     }
 
-    /// <summary>
-    /// Called when this button is clicked. It will select itself and
-    /// deselect all sibling HighlightButtonComponents under the same parent.
-    /// </summary>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (_isSelected) return;
@@ -79,9 +61,6 @@ public class HighlightButtonComponent : MonoBehaviour, IPointerClickHandler
         Select();
     }
 
-    /// <summary>
-    /// Set the background image to selectedSprite and text to selectedTextColor.
-    /// </summary>
     private void Select()
     {
         if (selectedSprite != null)
@@ -95,9 +74,6 @@ public class HighlightButtonComponent : MonoBehaviour, IPointerClickHandler
         _isSelected = true;
     }
 
-    /// <summary>
-    /// Set the background image to normalSprite and text to normalTextColor.
-    /// </summary>
     private void Deselect()
     {
         if (normalSprite != null)
@@ -111,9 +87,6 @@ public class HighlightButtonComponent : MonoBehaviour, IPointerClickHandler
         _isSelected = false;
     }
 
-    /// <summary>
-    /// Public method to force this button into the selected state (deselects siblings).
-    /// </summary>
     public void ForceSelect()
     {
         if (_isSelected) return;
@@ -132,26 +105,17 @@ public class HighlightButtonComponent : MonoBehaviour, IPointerClickHandler
         Select();
     }
 
-    /// <summary>
-    /// Public method to force this button into the normal (deselected) state.
-    /// </summary>
     public void ForceDeselect()
     {
         if (!_isSelected) return;
         Deselect();
     }
 
-    /// <summary>
-    /// Returns true if this button is currently in the selected state.
-    /// </summary>
     public bool IsSelected()
     {
         return _isSelected;
     }
 
-    /// <summary>
-    /// Helper to set everything back to normal state at start or when resetting UI.
-    /// </summary>
     public void SetToNormal()
     {
         if (normalSprite != null)
