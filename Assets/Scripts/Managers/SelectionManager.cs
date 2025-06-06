@@ -18,6 +18,7 @@ public class SelectionManager : MonoBehaviour
     private List<OrganCard> currentCards = new List<OrganCard>();
     private List<GameObject> currentCardButtons = new List<GameObject>();
 
+
     void Start()
     {
         definePanelController.ClearPanelState();
@@ -26,8 +27,7 @@ public class SelectionManager : MonoBehaviour
     }
 
     public void GenerateRandomCards()
-    {
-        
+    {        
         // Destroy old buttons
         foreach (var btn in currentCardButtons)
             Destroy(btn);

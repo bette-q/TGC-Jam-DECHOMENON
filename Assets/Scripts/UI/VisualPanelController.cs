@@ -1,3 +1,4 @@
+// File: Assets/Scripts/VisualPanelController.cs
 using UnityEngine;
 
 public class VisualPanelController : MonoBehaviour
@@ -6,7 +7,7 @@ public class VisualPanelController : MonoBehaviour
     public ViewHelper viewHelper;
     public PlayerCameraControl playerCameraControl;
 
-    [Header("Default Torso")]
+    [Header("Default Torso Prefab")]
     public GameObject defaultTorsoPrefab;
 
     [Header("Socket Manager")]
@@ -18,45 +19,47 @@ public class VisualPanelController : MonoBehaviour
     {
         if (defaultTorsoPrefab != null)
         {
-            // 1) Show the torso in the ViewHelper (this returns the instantiated GameObject)
+            // 1) Show the torso under the ViewHelper
             _currentComboRoot = viewHelper.ShowPreview(defaultTorsoPrefab);
 
-            // 2) Point camera control at that new instance
+            // 2) Layer it onto VisualLayer
+            LayerUtils.SetLayerRecursively(_currentComboRoot, LayerMask.NameToLayer("VisualLayer"));
+
+            // 3) Point camera controls at it
             if (playerCameraControl != null && _currentComboRoot != null)
-            {
                 playerCameraControl.viewRoot = _currentComboRoot.transform;
-            }
 
-            // 3) Tell SocketManager to use the _currentComboRoot¡¯s transform,
-            //    not the prefab¡¯s transform (which lives in Assets, not in the scene).
+            // 4) Bind sockets now that torso exists
             socketManager.SetTorso(_currentComboRoot.transform);
-
-            // 4) Now that torsoRoot is set, update the SocketManager¡¯s bindings:
-            socketManager.BindSocketsToInstance();
         }
     }
 
+    /// <summary>
+    /// Swap in a new combo or prefab into the VisualPanel.
+    /// </summary>
     public void UpdateCombo(GameObject comboPrefab)
     {
-        // If you later need to swap to a different ¡°comboPrefab¡± (e.g. torso+attached parts),
-        // do the same: clear, re©\show, re©\bind.
         viewHelper.ClearPreview();
-
         if (comboPrefab == null)
         {
-            playerCameraControl.viewRoot = null;
+            if (playerCameraControl != null)
+                playerCameraControl.viewRoot = null;
             _currentComboRoot = null;
             return;
         }
 
+        // 1) Show the new prefab/combo
         _currentComboRoot = viewHelper.ShowPreview(comboPrefab);
-        if (playerCameraControl != null && _currentComboRoot != null)
-        {
-            playerCameraControl.viewRoot = _currentComboRoot.transform;
-        }
 
+        // 2) Layer it
+        LayerUtils.SetLayerRecursively(_currentComboRoot, LayerMask.NameToLayer("VisualLayer"));
+
+        // 3) Update camera target
+        if (playerCameraControl != null && _currentComboRoot != null)
+            playerCameraControl.viewRoot = _currentComboRoot.transform;
+
+        // 4) Re-bind sockets (for new torso or combo)
         socketManager.SetTorso(_currentComboRoot.transform);
-        socketManager.BindSocketsToInstance();
     }
 
     public void ClearVisual()

@@ -1,11 +1,12 @@
-// File: Assets/Editor/SocketParserEditor.cs
+ï»¿// File: Assets/Editor/SocketParserEditor.cs
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Linq;
 
 public class SocketParserEditor : EditorWindow
 {
-    private string prefabFolder = "Assets/Prefabs";
+    private string prefabFolder = "Assets/Prefabs/Organs";
     private SocketDatabase _db;
 
     [MenuItem("Tools/SocketParser")]
@@ -18,7 +19,7 @@ public class SocketParserEditor : EditorWindow
 
         if (_db == null)
         {
-            _db = FindObjectOfType<SocketDatabase>();
+            _db = Object.FindFirstObjectByType<SocketDatabase>();
             if (_db == null)
                 EditorGUILayout.HelpBox("No SocketDatabase found in the scene. Create one first.", MessageType.Warning);
         }
@@ -38,110 +39,139 @@ public class SocketParserEditor : EditorWindow
             return;
         }
 
-        _db.allTorsos.Clear();
+        // Clear existing
+        _db.torsoData.sockets.Clear();
+        _db.torsoData.prefabName = "";
         _db.allOrgans.Clear();
 
-        // 1) Find all GameObject assets under prefabFolder
+        // Find all prefabs
         string[] guids = AssetDatabase.FindAssets("t:GameObject", new[] { prefabFolder });
-
         foreach (string guid in guids)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            if (prefab == null) continue;
+            if (prefab == null)
+                continue;
 
-            // 2) Detect if this prefab has "torso_root" or "organ_root"
-            Transform torsoRoot = prefab.transform.Find("torso_root");
-            Transform organRoot = prefab.transform.Find("organ_root");
+            // === Torso parsing ===
+            var torsoRoot = prefab
+                .GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "torso_root");
 
             if (torsoRoot != null)
             {
-                // This is a torso prefab
                 TorsoData td = new TorsoData
                 {
                     prefabName = prefab.name,
                     sockets = new System.Collections.Generic.List<TorsoSocketEntry>()
                 };
 
-                // Find all children named "torso_socket_*"
-                foreach (Transform child in prefab.GetComponentsInChildren<Transform>(true))
+                Debug.Log($"[SocketParser] Found torso_root in '{prefab.name}' at path '{GetFullPath(torsoRoot)}'");
+
+                // find all torso_socket_* under torsoRoot
+                var socketTransforms = torsoRoot
+                    .GetComponentsInChildren<Transform>(true)
+                    .Where(t => t.name.StartsWith("torso_socket_"));
+
+                foreach (var socket in socketTransforms)
                 {
-                    if (child.name.StartsWith("torso_socket_"))
+                    var localPos = torsoRoot.InverseTransformPoint(socket.position);
+                    var localRot = Quaternion.Inverse(torsoRoot.rotation) * socket.rotation;
+
+                    TorsoSocketEntry entry = new TorsoSocketEntry
                     {
-                        TorsoSocketEntry entry = new TorsoSocketEntry
-                        {
-                            name = child.name,
-                            localPosition = child.localPosition,
-                            localRotation = child.localRotation
-                        };
-                        td.sockets.Add(entry);
-                    }
+                        name = socket.name,
+                        localPosition = localPos,
+                        localRotation = localRot
+                    };
+                    td.sockets.Add(entry);
+
+                    Debug.Log($"   â€¢ Parsed {entry.name} at localPos={entry.localPosition}, localRot={entry.localRotation.eulerAngles}");
                 }
 
-                _db.allTorsos.Add(td);
-                Debug.Log($"[SocketParser] Parsed Torso '{prefab.name}' with {td.sockets.Count} sockets.");
+                _db.torsoData = td;
+                continue;
             }
-            else if (organRoot != null)
+
+            // === Organ parsing ===
+            var organRoot = prefab
+                .GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "organ_root");
+
+            if (organRoot != null)
             {
-                // This is an organ prefab
                 OrganData od = new OrganData
                 {
                     prefabName = prefab.name
                 };
 
-                Transform head = prefab.transform.Find("organ_socket_head");
-                Transform tail = prefab.transform.Find("organ_socket_tail");
-                Transform leaf = prefab.transform.Find("organ_socket_leaf");
+                Debug.Log($"[SocketParser] Found organ_root in '{prefab.name}' at path '{GetFullPath(organRoot)}'");
+
+                // head
+                var head = organRoot
+                    .GetComponentsInChildren<Transform>(true)
+                    .FirstOrDefault(t => t.name == "organ_socket_head");
+                // tail
+                var tail = organRoot
+                    .GetComponentsInChildren<Transform>(true)
+                    .FirstOrDefault(t => t.name == "organ_socket_tail");
+                // leaf or fallback
+                var leaf = organRoot
+                    .GetComponentsInChildren<Transform>(true)
+                    .FirstOrDefault(t => t.name == "organ_socket_leaf")
+                    ?? head;
 
                 if (head == null || tail == null)
                 {
-                    Debug.LogError($"[SocketParser] Organ '{prefab.name}' is missing head or tail socket. Skipping.");
+                    Debug.LogError($"[SocketParser] Organ '{prefab.name}' missing head or tail socket. Skipping.");
                     continue;
                 }
 
                 od.head = new OrganSocketEntry
                 {
-                    name = "organ_socket_head",
-                    localPosition = head.localPosition,
-                    localRotation = head.localRotation
+                    name = head.name,
+                    localPosition = organRoot.InverseTransformPoint(head.position),
+                    localRotation = Quaternion.Inverse(organRoot.rotation) * head.rotation
                 };
                 od.tail = new OrganSocketEntry
                 {
-                    name = "organ_socket_tail",
-                    localPosition = tail.localPosition,
-                    localRotation = tail.localRotation
+                    name = tail.name,
+                    localPosition = organRoot.InverseTransformPoint(tail.position),
+                    localRotation = Quaternion.Inverse(organRoot.rotation) * tail.rotation
+                };
+                od.leaf = new OrganSocketEntry
+                {
+                    name = leaf.name,
+                    localPosition = organRoot.InverseTransformPoint(leaf.position),
+                    localRotation = Quaternion.Inverse(organRoot.rotation) * leaf.rotation
                 };
 
-                if (leaf != null)
-                {
-                    od.leaf = new OrganSocketEntry
-                    {
-                        name = "organ_socket_leaf",
-                        localPosition = leaf.localPosition,
-                        localRotation = leaf.localRotation
-                    };
-                }
-                else
-                {
-                    // If no explicit leaf, reuse head
-                    od.leaf = new OrganSocketEntry
-                    {
-                        name = "organ_socket_head",
-                        localPosition = head.localPosition,
-                        localRotation = head.localRotation
-                    };
-                }
+                Debug.Log($"   â€¢ Parsed head at {od.head.localPosition}, tail at {od.tail.localPosition}, leaf at {od.leaf.localPosition}");
 
                 _db.allOrgans.Add(od);
-                Debug.Log($"[SocketParser] Parsed Organ '{prefab.name}'.");
+                continue;
             }
-            // else: neither torso nor organ ¡ú ignore
+
+            // neither torso nor organ
+            Debug.LogWarning($"[SocketParser] Prefab '{prefab.name}' has neither torso_root nor organ_root. Skipping.");
         }
 
-        // Mark scene dirty so Unity saves these lists
+        // Save
         EditorUtility.SetDirty(_db);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("SocketParser: Done parsing all prefabs into SocketDatabase.");
+        Debug.Log("SocketParser: Finished parsing all prefabs.");
+    }
+
+    // helper to get full hierarchy path
+    private static string GetFullPath(Transform t)
+    {
+        string path = t.name;
+        while (t.parent != null)
+        {
+            t = t.parent;
+            path = t.name + "/" + path;
+        }
+        return path;
     }
 }

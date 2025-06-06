@@ -1,33 +1,34 @@
+// File: Assets/Scripts/SocketVisualizer.cs
 using UnityEngine;
 
+[ExecuteAlways]
 public class SocketVisualizer : MonoBehaviour
 {
-    public float gizmoLength = 0.2f;
+    [Tooltip("Radius of each socket gizmo sphere")]
+    public float gizmoRadius = 0.05f;
+    public SocketDatabase db;
 
     private void OnDrawGizmos()
     {
-        foreach (Transform child in transform)
+        if (db == null) return;
+
+        var data = db.torsoData;
+        if (string.IsNullOrEmpty(data.prefabName) || data.sockets == null) return;
+
+        // DEBUG: log world positions so you can verify they're distinct
+        for (int i = 0; i < data.sockets.Count; i++)
         {
-            if (child.name.StartsWith("Socket"))
-            {
+            var entry = data.sockets[i];
+            Vector3 worldPos = transform.TransformPoint(entry.localPosition);
+            Debug.Log($"[Visualizer] Socket[{i}] '{entry.name}' at {worldPos}");
+        }
 
-                // Draw position sphere
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawSphere(child.position, 0.08f);
-
-      /*          // Draw forward direction (blue)
-                Gizmos.color = Color.blue;
-                Gizmos.DrawLine(child.position, child.position + child.forward * gizmoLength);
-
-                // Draw up direction (green)
-                Gizmos.color = Color.green;
-                Gizmos.DrawLine(child.position, child.position + child.up * gizmoLength);
-
-                // Draw right direction (red)
-                Gizmos.color = Color.red;
-                Gizmos.DrawLine(child.position, child.position + child.right * gizmoLength);*/
-            }
+        // Draw a small wire-sphere at each socket
+        Gizmos.color = Color.yellow;
+        for (int i = 0; i < data.sockets.Count; i++)
+        {
+            Vector3 worldPos = transform.TransformPoint(data.sockets[i].localPosition);
+            Gizmos.DrawWireSphere(worldPos, gizmoRadius);
         }
     }
-
 }
