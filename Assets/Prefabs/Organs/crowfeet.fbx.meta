@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: crowfeet_idle
+      name: idle
       takeName: crowfeet_idle
       internalID: 2622448481645330311
       firstFrame: 0
@@ -60,7 +60,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: crowfeet_active
+      name: active
       takeName: crowfeet_active
       internalID: -6199713760918959715
       firstFrame: 0

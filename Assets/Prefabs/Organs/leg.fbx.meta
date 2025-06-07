@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: leg_active2
+      name: active2
       takeName: leg_active2
       internalID: 1007525338778928518
       firstFrame: 0
@@ -60,7 +60,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: leg_active
+      name: active
       takeName: leg_active
       internalID: -311162974517857739
       firstFrame: 0
@@ -89,7 +89,7 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: leg_idle
+      name: idle
       takeName: leg_idle
       internalID: 7715064944884114098
       firstFrame: 0
