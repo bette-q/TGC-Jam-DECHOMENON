@@ -7,5 +7,9 @@ AnimatorOverrideController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: mantisheadOC
-  m_Controller: {fileID: 0}
-  m_Clips: []
+  m_Controller: {fileID: 9100000, guid: 862e31adf2ef0d1408e13dff3a4463f1, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: -6564960347390760393, guid: 8bdc0dbd3aa2b4f44a73ebf539f56ccc, type: 3}
+    m_OverrideClip: {fileID: -427042082392090168, guid: 0167d1ccd51fe41e488b2d27c5e77d7f, type: 3}
+  - m_OriginalClip: {fileID: 9027862475183280674, guid: 8bdc0dbd3aa2b4f44a73ebf539f56ccc, type: 3}
+    m_OverrideClip: {fileID: 8193331426509357697, guid: 0167d1ccd51fe41e488b2d27c5e77d7f, type: 3}

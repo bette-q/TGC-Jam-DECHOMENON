@@ -7,5 +7,9 @@ AnimatorOverrideController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: legOC
-  m_Controller: {fileID: 0}
-  m_Clips: []
+  m_Controller: {fileID: 9100000, guid: 862e31adf2ef0d1408e13dff3a4463f1, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 9027862475183280674, guid: 8bdc0dbd3aa2b4f44a73ebf539f56ccc, type: 3}
+    m_OverrideClip: {fileID: 7715064944884114098, guid: c78180cd69f9c4dd0850b36a2d04f8f0, type: 3}
+  - m_OriginalClip: {fileID: -6564960347390760393, guid: 8bdc0dbd3aa2b4f44a73ebf539f56ccc, type: 3}
+    m_OverrideClip: {fileID: -311162974517857739, guid: c78180cd69f9c4dd0850b36a2d04f8f0, type: 3}
