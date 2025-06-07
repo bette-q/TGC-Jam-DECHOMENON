@@ -6,7 +6,7 @@ using System.Linq;
 
 public class SocketParserEditor : EditorWindow
 {
-    private string prefabFolder = "Assets/Prefabs/Organs";
+    private string prefabFolder = "Assets/Prefabs/OrganPrefab";
     private SocketDatabase _db;
 
     [MenuItem("Tools/SocketParser")]
