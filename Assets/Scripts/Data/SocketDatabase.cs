@@ -45,6 +45,24 @@ public class SocketDatabase : MonoBehaviour
             .FirstOrDefault(t => t.name == "organ_root");
     }
 
+    public GameObject GetTorsoPrefab()
+    {
+        return torsoData.torsoPrefab;
+    }
+
+    public GameObject GetOrganPrefab(string prefabName) 
+    {
+        foreach(var od in allOrgans)
+        {
+            if(od.prefabName.Equals(prefabName))
+            {
+                return od.organPrefab;
+            }
+        }
+
+        return null;
+    }
+
     [ContextMenu("Print All Socket Info")]
     public void PrintAllInfo()
     {

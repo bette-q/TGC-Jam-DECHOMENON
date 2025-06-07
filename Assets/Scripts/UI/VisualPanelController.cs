@@ -17,6 +17,8 @@ public class VisualPanelController : MonoBehaviour
 
     private void Start()
     {
+        defaultTorsoPrefab = SocketDatabase.Instance.GetTorsoPrefab();
+
         if (defaultTorsoPrefab != null)
         {
             // 1) Spawn the default torso into the preview panel

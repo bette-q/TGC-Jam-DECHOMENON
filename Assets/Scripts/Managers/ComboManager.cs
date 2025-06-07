@@ -7,75 +7,72 @@ public class ComboManager : MonoBehaviour
 
     /// <summary>
     /// Attaches `child` under `parent` by aligning the child¡¯s socket named
-    /// `childKey` to the parent¡¯s socket named `parentKey`.
+    /// `childKey` to the parent¡¯s tail socket¡ªrotating first, then translating.
     /// </summary>
     void Attach(GameObject child, GameObject parent, string childKey, string parentKey)
     {
-        // 1) Find the organ_root on this child instance
-        var childRoot = SocketDatabase.Instance
-            .GetOrganRoot(child);
-        if (childRoot == null)
+        // 1) grab the DB & organ_root bones
+        var db = SocketDatabase.Instance
+                 ?? Object.FindFirstObjectByType<SocketDatabase>();
+        if (db == null)
         {
-            Debug.LogError($"ComboManager: no organ_root on child '{child.name}'");
+            Debug.LogError($"ComboManager: No SocketDatabase in scene.");
             return;
         }
 
-        // 2) Lookup child data
+        Transform childRoot = db.GetOrganRoot(child);
+        Transform parentRoot = db.GetOrganRoot(parent);
+        if (childRoot == null || parentRoot == null)
+        {
+            Debug.LogError($"ComboManager: Missing organ_root on '{child.name}' or '{parent.name}'.");
+            return;
+        }
+
+        // 2) lookup data entries
         string childPrefab = child.name.Replace("(Clone)", "");
-        OrganData childData = SocketDatabase.Instance.GetOrganData(childPrefab);
-        if (childData == null)
+        OrganData cd = db.GetOrganData(childPrefab);
+        string parentPrefab = parent.name.Replace("(Clone)", "");
+        OrganData pd = db.GetOrganData(parentPrefab);
+        if (cd == null || pd == null)
         {
-            Debug.LogError($"ComboManager: no OrganData for child '{childPrefab}'");
+            Debug.LogError($"ComboManager: Missing OrganData for '{childPrefab}' or '{parentPrefab}'.");
             return;
         }
 
-        // pick correct socket entry
         OrganSocketEntry cEntry = childKey switch
         {
-            "organ_socket_head" => childData.head,
-            "organ_socket_tail" => childData.tail,
-            "organ_socket_leaf" => childData.leaf,
+            "organ_socket_head" => cd.head,
+            "organ_socket_tail" => cd.tail,
+            "organ_socket_leaf" => cd.leaf,
             _ => throw new System.ArgumentException($"Invalid childKey '{childKey}'")
         };
 
-        // world©\space of child socket
-        Vector3 childWorldPos = childRoot.TransformPoint(cEntry.localPosition);
-        Quaternion childWorldRot = childRoot.rotation * cEntry.localRotation;
-
-
-        // 3) Find parent organ_root
-        var parentRoot = SocketDatabase.Instance
-            .GetOrganRoot(parent);
-        if (parentRoot == null)
-        {
-            Debug.LogError($"ComboManager: no organ_root on parent '{parent.name}'");
-            return;
-        }
-
-        // only tail supported as parentKey
         if (parentKey != "organ_socket_tail")
         {
             Debug.LogError($"ComboManager: unsupported parentKey '{parentKey}'");
             return;
         }
+        OrganSocketEntry pEntry = pd.tail;
 
-        OrganSocketEntry pEntry = childKey switch
-        {
-            _ => childData.tail   // for now only tail¡úhead chaining 
-        };
+        // 3) compute both socket world©\poses *before* moving anything
+        Vector3 childPosWS0 = childRoot.TransformPoint(cEntry.localPosition);
+        Quaternion childRotWS = childRoot.rotation * cEntry.localRotation;
 
-        Vector3 parentWorldPos = parentRoot.TransformPoint(pEntry.localPosition);
-        Quaternion parentWorldRot = parentRoot.rotation * pEntry.localRotation;
+        Vector3 parentPosWS = parentRoot.TransformPoint(pEntry.localPosition);
+        Quaternion parentRotWS = parentRoot.rotation * pEntry.localRotation;
 
+        // 4) compute & apply rotation to the whole prefab
+        Quaternion deltaR = parentRotWS * Quaternion.Inverse(childRotWS);
+        child.transform.rotation = deltaR * child.transform.rotation;
 
-        // 4) Align child to parent
-        Quaternion deltaRot = parentWorldRot * Quaternion.Inverse(childWorldRot);
-        child.transform.rotation = deltaRot * child.transform.rotation;
+        // 5) **now** recompute child socket pos after rotation
+        Vector3 childPosWS1 = childRoot.TransformPoint(cEntry.localPosition);
 
-        Vector3 deltaPos = parentWorldPos - childWorldPos;
-        child.transform.position += deltaPos;
+        // 6) compute & apply translation
+        Vector3 deltaP = parentPosWS - childPosWS1;
+        child.transform.position += deltaP;
 
-        // 5) Parent under the parentRoot so it moves with it
+        // 7) parent under the socket bone (worldPositionStays = true)
         child.transform.SetParent(parentRoot, true);
     }
 
@@ -95,14 +92,15 @@ public class ComboManager : MonoBehaviour
         GameObject prev = null;
 
         // 2) Instantiate & chain each prefab
-        foreach (var prefab in arrangedPrefabs)
+        for (int i = 0; i < arrangedPrefabs.Count; i++)
         {
+            var prefab = arrangedPrefabs[i];
             GameObject inst = Instantiate(prefab);
             inst.transform.SetParent(comboRoot.transform, false);
 
             if (prev != null)
             {
-                bool isLast = (prefab == arrangedPrefabs[^1]);
+                bool isLast = (i == arrangedPrefabs.Count - 1);
                 string childKey = isLast ? "organ_socket_leaf" : "organ_socket_head";
                 string parentKey = "organ_socket_tail";
                 Attach(inst, prev, childKey, parentKey);

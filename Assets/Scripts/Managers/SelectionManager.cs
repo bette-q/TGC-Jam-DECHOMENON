@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public class SelectionManager : MonoBehaviour
 {
@@ -21,6 +22,11 @@ public class SelectionManager : MonoBehaviour
 
     void Start()
     {
+        organCardPrefabs = SocketDatabase.Instance
+                                   .allOrgans
+                                   .Select(o => o.organPrefab)
+                                   .ToList();
+
         definePanelController.ClearPanelState();
         cardButtonPrefab.SetActive(false);
         GenerateRandomCards();

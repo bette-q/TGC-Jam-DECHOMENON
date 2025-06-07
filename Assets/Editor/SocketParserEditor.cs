@@ -63,6 +63,7 @@ public class SocketParserEditor : EditorWindow
                 TorsoData td = new TorsoData
                 {
                     prefabName = prefab.name,
+                    torsoPrefab = prefab,
                     sockets = new System.Collections.Generic.List<TorsoSocketEntry>()
                 };
 
@@ -102,7 +103,8 @@ public class SocketParserEditor : EditorWindow
             {
                 OrganData od = new OrganData
                 {
-                    prefabName = prefab.name
+                    prefabName = prefab.name,
+                    organPrefab = prefab
                 };
 
                 Debug.Log($"[SocketParser] Found organ_root in '{prefab.name}' at path '{GetFullPath(organRoot)}'");

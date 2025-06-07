@@ -53,75 +53,66 @@ public class ComboTestSolo : MonoBehaviour
             {
                 bool isLast = (i == prefabsToChain.Count - 1);
                 string childKey = isLast ? "organ_socket_leaf" : "organ_socket_head";
-                string parentKey = "organ_socket_tail";
-                ChainTwo(inst, previous, childKey, parentKey);
+                ChainTwo(inst, previous, childKey);
             }
 
             previous = inst;
         }
     }
 
-    private void ChainTwo(GameObject childGO, GameObject parentGO,
-                          string childKey, string parentKey)
+    private void ChainTwo(GameObject childGO, GameObject parentGO, string childKey)
     {
-        // 1) get database & bones
         var db = SocketDatabase.Instance
                  ?? Object.FindFirstObjectByType<SocketDatabase>();
-        if (db == null)
-        {
-            Debug.LogError("ComboTestSolo: No SocketDatabase in scene.");
-            return;
-        }
+        if (db == null) { Debug.LogError("No SocketDatabase."); return; }
 
-        Transform childRoot = db.GetOrganRoot(childGO);
-        Transform parentRoot = db.GetOrganRoot(parentGO);
+        var childRoot = db.GetOrganRoot(childGO);
+        var parentRoot = db.GetOrganRoot(parentGO);
         if (childRoot == null || parentRoot == null)
         {
-            Debug.LogError("ComboTestSolo: Missing organ_root bone on child or parent.");
+            Debug.LogError("Missing organ_root bone.");
             return;
         }
 
-        // 2) lookup socket entries
         var cd = db.GetOrganData(childGO.name);
         var pd = db.GetOrganData(parentGO.name);
         if (cd == null || pd == null) return;
 
-        OrganSocketEntry cEntry = childKey switch
-        {
-            "organ_socket_head" => cd.head,
-            "organ_socket_tail" => cd.tail,
-            _ => cd.leaf
-        };
-        OrganSocketEntry pEntry = pd.tail; // always attach into tail
+        // pick the right child socket
+        var cEntry = childKey == "organ_socket_head"
+            ? cd.head
+            : childKey == "organ_socket_tail"
+                ? cd.tail
+                : cd.leaf;
+        var pEntry = pd.tail;
 
-        // 3) compute world-space socket poses
-        Vector3 childSocketWS = childRoot.TransformPoint(cEntry.localPosition);
-        Quaternion childRotWS = childRoot.rotation * cEntry.localRotation;
+        // 1) compute world-space socket positions *before* any transforms
+        Vector3 pPosWS = parentRoot.TransformPoint(pEntry.localPosition);
+        Quaternion pRotWS = parentRoot.rotation * pEntry.localRotation;
 
-        Vector3 parentSocketWS = parentRoot.TransformPoint(pEntry.localPosition);
-        Quaternion parentRotWS = parentRoot.rotation * pEntry.localRotation;
+        Vector3 cPosWS = childRoot.TransformPoint(cEntry.localPosition);
+        Quaternion cRotWS = childRoot.rotation * cEntry.localRotation;
 
-        // --- after you compute childRotWS and parentRotWS ---
+        // 2) compute and apply rotation (no translation yet)
+        Quaternion deltaR = pRotWS * Quaternion.Inverse(cRotWS);
 
-        // 1) Compute the basic socket alignment
-        Quaternion deltaR = parentRotWS * Quaternion.Inverse(childRotWS);
+        // if you need to flip around X-axis, do it here:
+        Vector3 socketX = pRotWS * Vector3.right;
+        Quaternion flipX = Quaternion.AngleAxis(180f, socketX);
+        Quaternion fullR = flipX * deltaR;
 
-        // 2) Figure out each socket¡¯s ¡°up¡± in world space
-        Vector3 childUpWorld = childRotWS * Vector3.up;            // child's socket-up
-        Vector3 parentUpWorld = parentRotWS * Vector3.up;           // parent's socket-up
+        childGO.transform.rotation = fullR * childGO.transform.rotation;
 
-        // 3) We want childUpWorld ¡ú exactly opposite of parentUpWorld
-        Quaternion flip = Quaternion.FromToRotation(childUpWorld, -parentUpWorld);
+        // 3) now that we've rotated, recompute *child* socket world-pos
+        Vector3 cPosWS2 = childRoot.TransformPoint(cEntry.localPosition);
 
-        // 4) Combine them: first align frames, then flip the up-axis
-        Quaternion fullDelta = flip * deltaR;
+        // 4) apply translation to line up sockets
+        Vector3 deltaP = pPosWS - cPosWS2;
+        childGO.transform.position += deltaP;
 
-        // 5) Apply the full rotation to the entire prefab
-        childGO.transform.rotation = fullDelta * childGO.transform.rotation;
-
-        // 6) Then apply your position offset and parenting as before
-        childGO.transform.position += (parentSocketWS - childSocketWS);
+        // 5) parent under the socket bone
         childGO.transform.SetParent(parentRoot, true);
-
     }
+
+
 }
