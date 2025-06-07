@@ -1,6 +1,7 @@
 // File: Assets/Scripts/SocketDatabase.cs
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class SocketDatabase : MonoBehaviour
 {
@@ -25,17 +26,25 @@ public class SocketDatabase : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Return the OrganData whose prefabName matches (no "(Clone)").
-    /// </summary>
     public OrganData GetOrganData(string prefabName)
     {
         return allOrgans.Find(o => o.prefabName == prefabName);
     }
+    public Transform GetTorsoRoot(GameObject torsoInstance)
+    {
+        // fast name lookup; will return the first Transform named "torso_root"
+        return torsoInstance.transform
+            .GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(t => t.name == "torso_root");
+    }
 
-    /// <summary>
-    /// Print every torso socket and every organ¡¯s sockets to the Unity console.
-    /// </summary>
+    public Transform GetOrganRoot(GameObject organInstance)
+    {
+        return organInstance.transform
+            .GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(t => t.name == "organ_root");
+    }
+
     [ContextMenu("Print All Socket Info")]
     public void PrintAllInfo()
     {

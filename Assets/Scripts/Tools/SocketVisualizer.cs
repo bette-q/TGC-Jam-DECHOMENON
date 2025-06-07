@@ -4,42 +4,39 @@ using UnityEditor;
 #endif
 
 [ExecuteAlways]
-[AddComponentMenu("Visualization/Socket Visualizer")]
-public class SocketVisualizer : MonoBehaviour
+[AddComponentMenu("Visualization/Torso Socket Visualizer")]
+public class TorsoSocketVisualizer : MonoBehaviour
 {
     [Tooltip("Radius of each socket gizmo sphere")]
     public float gizmoRadius = 0.05f;
-
     [Tooltip("Color of the socket gizmo spheres")]
     public Color gizmoColor = Color.yellow;
 
-    [Tooltip("Reference to the socket database holding organ socket data")]
-    public SocketDatabase db;
-
     private void OnDrawGizmos()
     {
-        if (db == null) return;
+        // 1) grab the database
+        var db = SocketDatabase.Instance
+                 ?? Object.FindFirstObjectByType<SocketDatabase>();
+        var data = db?.torsoData;
+        if (data?.sockets == null) return;
 
-        // Determine the clean prefab name (strip Clone suffix)
-        string goName = gameObject.name.Replace("(Clone)", "");
-        OrganData organ = db.GetOrganData(goName);
-        if (organ == null) return;
+        // 2) choose the *correct* root transform
+        Transform root = db.GetOrganRoot(gameObject);
 
         Gizmos.color = gizmoColor;
-        Transform t = transform;
 
-        // Draw solid spheres for head, tail, and leaf sockets
-        DrawSocket(organ.head, t);
-        DrawSocket(organ.tail, t);
-        DrawSocket(organ.leaf, t);
+        // 3) draw
+        foreach (var entry in data.sockets)
+            DrawSocket(entry, root);
     }
 
-    private void DrawSocket(OrganSocketEntry entry, Transform parent)
+    private void DrawSocket(TorsoSocketEntry entry, Transform parent)
     {
+        // FBX-local ¡ú world
         Vector3 worldPos = parent.TransformPoint(entry.localPosition);
         Gizmos.DrawSphere(worldPos, gizmoRadius);
+
 #if UNITY_EDITOR
-        // Optional label in Scene view
         Handles.color = gizmoColor;
         Handles.Label(worldPos + Vector3.up * gizmoRadius * 1.2f, entry.name);
 #endif

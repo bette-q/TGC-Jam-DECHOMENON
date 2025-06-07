@@ -1,5 +1,4 @@
-﻿// File: Assets/Scripts/SocketManager.cs
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 [System.Serializable]
@@ -7,7 +6,7 @@ public class SocketBinding
 {
     public string socketName;     // e.g. "torso_socket_0"
     public Transform socket;      // the generated socket transform under torsoRoot
-    public Transform comboAnchor; // child named "comboAnchor" or same as socket
+    public Transform comboAnchor; // child named "comboAnchor"
 }
 
 public class SocketManager : MonoBehaviour
@@ -19,15 +18,28 @@ public class SocketManager : MonoBehaviour
     [Tooltip("How many of the first sockets count as green")]
     [SerializeField] private int greenSocketCt = 3;
 
-    public void SetTorso(Transform torso)
+    /// <summary>
+    /// Call this with the instantiated torso GameObject.
+    /// </summary>
+    public void SetTorso(GameObject torsoInstance)
     {
-        torsoRoot = torso;
+        // 1) find the correct "torso_root" on this instance
+        torsoRoot = SocketDatabase.Instance
+            .GetTorsoRoot(torsoInstance);
+
+        if (torsoRoot == null)
+        {
+            Debug.LogError($"SocketManager: could not find torso_root on {torsoInstance.name}");
+            return;
+        }
+
         BindSocketsToInstance();
     }
 
     private void BindSocketsToInstance()
     {
         runtimeBindings.Clear();
+
         if (torsoRoot == null)
         {
             Debug.LogError("SocketManager: torsoRoot is null.");
@@ -41,35 +53,29 @@ public class SocketManager : MonoBehaviour
             return;
         }
 
-        // Remove any previously generated sockets
-        for (int i = torsoRoot.childCount - 1; i >= 0; i--)
-        {
-            var child = torsoRoot.GetChild(i);
+        // Remove any old sockets
+        foreach (Transform child in torsoRoot)
             if (child.name.StartsWith("torso_socket_"))
                 DestroyImmediate(child.gameObject);
-        }
 
-        // For each entry in the database, create a socket under torsoRoot
+        // Re-create sockets under torsoRoot
         foreach (var entry in data.sockets)
         {
-            // 1) Create an empty GameObject named exactly like the socket
             var sockGO = new GameObject(entry.name);
             sockGO.transform.SetParent(torsoRoot, false);
 
-            // 2) Apply local position & rotation from the parsed data
-            sockGO.transform.localPosition = entry.localPosition;
-            sockGO.transform.localRotation = entry.localRotation;
+            // world‐position & rotation via TransformPoint, then parent
+            Vector3 worldPos = torsoRoot.TransformPoint(entry.localPosition);
+            Quaternion worldRot = torsoRoot.rotation * entry.localRotation;
+
+            sockGO.transform.position = worldPos;
+            sockGO.transform.rotation = worldRot;
             sockGO.transform.localScale = Vector3.one;
 
-            // 3) Optionally create or find a "comboAnchor" child under this socket
-            //    Here we just use the socket itself as the anchor, but you could do:
-            GameObject anchorGO = new GameObject("comboAnchor");
+            // comboAnchor child
+            var anchorGO = new GameObject("comboAnchor");
             anchorGO.transform.SetParent(sockGO.transform, false);
-            anchorGO.transform.localPosition = Vector3.zero;
-            anchorGO.transform.localRotation = Quaternion.identity;
-            anchorGO.transform.localScale = Vector3.one;
 
-            // 4) Add to runtimeBindings
             runtimeBindings.Add(new SocketBinding
             {
                 socketName = entry.name,
@@ -94,16 +100,12 @@ public class SocketManager : MonoBehaviour
             ? Random.Range(0, maxGreen)
             : Random.Range(0, runtimeBindings.Count);
 
-        Debug.LogError("SocketManager: attach at " + idx + "socket");
-
-
         AttachBodyPart(idx, comboRoot);
     }
 
     private void AttachBodyPart(int i, GameObject organRoot)
     {
         if (i < 0 || i >= runtimeBindings.Count) return;
-
         if (attached.TryGetValue(i, out var old))
         {
             Destroy(old);
@@ -113,7 +115,7 @@ public class SocketManager : MonoBehaviour
         var sb = runtimeBindings[i];
         var attachPoint = sb.comboAnchor;
 
-        // align organ_socket_head
+        // align organ_socket_head (organRoot must have been parsed from organ_root bone)
         var inputSocket = organRoot.transform.Find("organ_socket_head");
         if (inputSocket == null)
         {
@@ -123,18 +125,12 @@ public class SocketManager : MonoBehaviour
         {
             var deltaRot = attachPoint.rotation * Quaternion.Inverse(inputSocket.rotation);
             organRoot.transform.rotation = deltaRot * organRoot.transform.rotation;
+
             var deltaPos = attachPoint.position - inputSocket.position;
             organRoot.transform.position += deltaPos;
         }
 
         organRoot.transform.SetParent(attachPoint, true);
-
-        // fix scale
-        var ps = attachPoint.lossyScale;
-        var cs = organRoot.transform.lossyScale;
-        var fix = new Vector3(ps.x / cs.x, ps.y / cs.y, ps.z / cs.z);
-        organRoot.transform.localScale = Vector3.Scale(organRoot.transform.localScale, fix);
-
         attached[i] = organRoot;
     }
 }

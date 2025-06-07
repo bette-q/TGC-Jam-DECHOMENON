@@ -1,4 +1,3 @@
-// File: Assets/Scripts/ComboManager.cs
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,11 +7,20 @@ public class ComboManager : MonoBehaviour
 
     /// <summary>
     /// Attaches `child` under `parent` by aligning the child¡¯s socket named
-    /// `childKey` to the parent¡¯s socket named `parentKey`, using OrganData for both.
+    /// `childKey` to the parent¡¯s socket named `parentKey`.
     /// </summary>
     void Attach(GameObject child, GameObject parent, string childKey, string parentKey)
     {
-        // --- Child socket world transform via OrganData ---
+        // 1) Find the organ_root on this child instance
+        var childRoot = SocketDatabase.Instance
+            .GetOrganRoot(child);
+        if (childRoot == null)
+        {
+            Debug.LogError($"ComboManager: no organ_root on child '{child.name}'");
+            return;
+        }
+
+        // 2) Lookup child data
         string childPrefab = child.name.Replace("(Clone)", "");
         OrganData childData = SocketDatabase.Instance.GetOrganData(childPrefab);
         if (childData == null)
@@ -21,73 +29,58 @@ public class ComboManager : MonoBehaviour
             return;
         }
 
-        Vector3 childLocalPos;
-        Quaternion childLocalRot;
-        switch (childKey)
+        // pick correct socket entry
+        OrganSocketEntry cEntry = childKey switch
         {
-            case "organ_socket_head":
-                childLocalPos = childData.head.localPosition;
-                childLocalRot = childData.head.localRotation;
-                break;
-            case "organ_socket_tail":
-                childLocalPos = childData.tail.localPosition;
-                childLocalRot = childData.tail.localRotation;
-                break;
-            case "organ_socket_leaf":
-                childLocalPos = childData.leaf.localPosition;
-                childLocalRot = childData.leaf.localRotation;
-                break;
-            default:
-                Debug.LogError($"ComboManager: invalid childKey '{childKey}'");
-                return;
-        }
+            "organ_socket_head" => childData.head,
+            "organ_socket_tail" => childData.tail,
+            "organ_socket_leaf" => childData.leaf,
+            _ => throw new System.ArgumentException($"Invalid childKey '{childKey}'")
+        };
 
-        Transform childRoot = child.transform;
-        Vector3 childWorldPos = childRoot.TransformPoint(childLocalPos);
-        Quaternion childWorldRot = childRoot.rotation * childLocalRot;
+        // world©\space of child socket
+        Vector3 childWorldPos = childRoot.TransformPoint(cEntry.localPosition);
+        Quaternion childWorldRot = childRoot.rotation * cEntry.localRotation;
 
-        // --- Parent socket world transform via OrganData ---
-        string parentPrefab = parent.name.Replace("(Clone)", "");
-        OrganData parentData = SocketDatabase.Instance.GetOrganData(parentPrefab);
-        if (parentData == null)
+
+        // 3) Find parent organ_root
+        var parentRoot = SocketDatabase.Instance
+            .GetOrganRoot(parent);
+        if (parentRoot == null)
         {
-            Debug.LogError($"ComboManager: no OrganData for parent '{parentPrefab}'");
+            Debug.LogError($"ComboManager: no organ_root on parent '{parent.name}'");
             return;
         }
 
-        Vector3 parentLocalPos;
-        Quaternion parentLocalRot;
-        if (parentKey == "organ_socket_tail")
-        {
-            parentLocalPos = parentData.tail.localPosition;
-            parentLocalRot = parentData.tail.localRotation;
-        }
-        else
+        // only tail supported as parentKey
+        if (parentKey != "organ_socket_tail")
         {
             Debug.LogError($"ComboManager: unsupported parentKey '{parentKey}'");
             return;
         }
 
-        Transform parentRoot = parent.transform;
-        Vector3 parentWorldPos = parentRoot.TransformPoint(parentLocalPos);
-        Quaternion parentWorldRot = parentRoot.rotation * parentLocalRot;
+        OrganSocketEntry pEntry = childKey switch
+        {
+            _ => childData.tail   // for now only tail¡úhead chaining 
+        };
 
-        // --- Align child to parent ---
+        Vector3 parentWorldPos = parentRoot.TransformPoint(pEntry.localPosition);
+        Quaternion parentWorldRot = parentRoot.rotation * pEntry.localRotation;
+
+
+        // 4) Align child to parent
         Quaternion deltaRot = parentWorldRot * Quaternion.Inverse(childWorldRot);
         child.transform.rotation = deltaRot * child.transform.rotation;
 
         Vector3 deltaPos = parentWorldPos - childWorldPos;
         child.transform.position += deltaPos;
 
-        // --- Parent the child under the parent socket anchor ---
-        // If you need an actual Transform under parentRoot to attach to,
-        // you can create/find a child named parentKey. Here we just parent
-        // under parentRoot so it moves together.
+        // 5) Parent under the parentRoot so it moves with it
         child.transform.SetParent(parentRoot, true);
     }
 
     /// <summary>
-    /// Builds a combo from 2¨C5 organs, chains them via Attach, layers, then snaps to a torso socket.
+    /// Builds a combo from 2¨C5 organs, chains them via Attach, then snaps to torso.
     /// </summary>
     public void BuildFromOrder(List<GameObject> arrangedPrefabs, bool isGreen)
     {
@@ -97,25 +90,20 @@ public class ComboManager : MonoBehaviour
             return;
         }
 
-        // 1) Create combo root
+        // 1) Spawn the combo root
         GameObject comboRoot = new GameObject("Combo");
         GameObject prev = null;
 
-        // 2) Instantiate and chain
-        for (int i = 0; i < arrangedPrefabs.Count; i++)
+        // 2) Instantiate & chain each prefab
+        foreach (var prefab in arrangedPrefabs)
         {
-            GameObject inst = Instantiate(arrangedPrefabs[i]);
+            GameObject inst = Instantiate(prefab);
             inst.transform.SetParent(comboRoot.transform, false);
 
-            if (i == 0)
+            if (prev != null)
             {
-                inst.transform.localPosition = Vector3.zero;
-                inst.transform.localRotation = Quaternion.identity;
-            }
-            else
-            {
-                bool last = (i == arrangedPrefabs.Count - 1);
-                string childKey = last ? "organ_socket_leaf" : "organ_socket_head";
+                bool isLast = (prefab == arrangedPrefabs[^1]);
+                string childKey = isLast ? "organ_socket_leaf" : "organ_socket_head";
                 string parentKey = "organ_socket_tail";
                 Attach(inst, prev, childKey, parentKey);
             }
@@ -123,7 +111,7 @@ public class ComboManager : MonoBehaviour
             prev = inst;
         }
 
-        // 3) Layer the combo
+        // 3) Layer it
         LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
 
         // 4) Attach to torso

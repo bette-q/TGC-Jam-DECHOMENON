@@ -16,6 +16,7 @@ public struct TorsoSocketEntry
 public class TorsoData
 {
     public string prefabName;                  // e.g. "Torso_A" (no "(Clone)")
+
     public List<TorsoSocketEntry> sockets = new List<TorsoSocketEntry>();
 }
 
