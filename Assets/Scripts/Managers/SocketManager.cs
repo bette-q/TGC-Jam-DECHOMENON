@@ -16,7 +16,7 @@ public class SocketManager : MonoBehaviour
     private Dictionary<int, GameObject> attached = new Dictionary<int, GameObject>();
 
     [Tooltip("How many of the first sockets count as green")]
-    [SerializeField] private int greenSocketCt = 3;
+    [SerializeField] private int greenSocketCt = 6;
 
     /// <summary>
     /// Call this with the instantiated torso GameObject.
