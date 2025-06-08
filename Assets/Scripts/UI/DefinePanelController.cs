@@ -73,6 +73,8 @@ public class DefinePanelController : MonoBehaviour
         }
     }
 
+
+
     public void ClearPanelState()
     {
         previewedCard = null;
@@ -87,8 +89,8 @@ public class DefinePanelController : MonoBehaviour
 
         onTopPanelUpdateCallback = null;
 
-        // Clear the preview
         viewHelper.ClearPreview();
+
         if (playerCameraControl != null)
         {
             playerCameraControl.viewRoot = null;

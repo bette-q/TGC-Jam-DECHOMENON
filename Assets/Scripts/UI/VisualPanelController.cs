@@ -22,7 +22,7 @@ public class VisualPanelController : MonoBehaviour
         if (defaultTorsoPrefab != null)
         {
             // 1) Spawn the default torso into the preview panel
-            _currentPreview = viewHelper.ShowPreview(defaultTorsoPrefab);
+            _currentPreview = viewHelper.ShowVisual(defaultTorsoPrefab);
 
             // 2) Put it on the VisualLayer
             LayerUtils.SetLayerRecursively(_currentPreview, LayerMask.NameToLayer("VisualLayer"));
@@ -53,7 +53,7 @@ public class VisualPanelController : MonoBehaviour
         }
 
         // 1) Spawn the new combo/prefab
-        _currentPreview = viewHelper.ShowPreview(comboPrefab);
+        _currentPreview = viewHelper.ShowVisual(comboPrefab);
 
         // 2) Layer it
         LayerUtils.SetLayerRecursively(_currentPreview, LayerMask.NameToLayer("VisualLayer"));

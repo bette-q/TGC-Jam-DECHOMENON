@@ -627,6 +627,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 55510809}
   m_CullTransparentMesh: 1
+--- !u!1 &92889467
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 92889469}
+  - component: {fileID: 92889470}
+  m_Layer: 0
+  m_Name: PreviewManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &92889469
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 92889467}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.1013365, y: 6.5387373, z: -0.8780823}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &92889470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 92889467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb57f8849bdf5e9498f952e00f2d0272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  viewHelper: {fileID: 1343874866}
 --- !u!1 &111922390
 GameObject:
   m_ObjectHideFlags: 0
@@ -2551,13 +2596,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   torsoData:
     prefabName: Torso
-    torsoPrefab: {fileID: 919132149155446097, guid: e97c8d73b1b47427f94db937e25a37a6, type: 3}
+    torsoPrefab: {fileID: 8102493068804676708, guid: 8af5d921ee4762d4082a3b5ee31b0d7b, type: 3}
     sockets:
     - name: torso_socket_0
       localPosition: {x: 0, y: 0.13251647, z: -0.01638876}
       localRotation: {x: 0.037297092, y: -0.00000011912636, z: -0.0000000044461523, w: 0.9993041}
     - name: torso_socket_1
-      localPosition: {x: -0.02306471, y: 0.04668482, z: -0.00054311013}
+      localPosition: {x: -0.023064712, y: 0.04668482, z: -0.0005431064}
       localRotation: {x: -0.010500444, y: 0.010500446, z: 0.70702887, w: 0.70702875}
     - name: torso_socket_2
       localPosition: {x: -0.034938257, y: 0.10807263, z: -0.0023669975}
@@ -2569,40 +2614,40 @@ MonoBehaviour:
       localPosition: {x: 0, y: 0.11968535, z: -0.0062311227}
       localRotation: {x: 0.6351903, y: 0.0000011048695, z: 0.00000090865177, w: 0.77235556}
     - name: torso_socket_5
-      localPosition: {x: -0.018178811, y: 0.004668278, z: 0.00070523476}
+      localPosition: {x: -0.018178811, y: 0.004668278, z: 0.00070523197}
       localRotation: {x: 0.99604255, y: -0.08762852, z: 0.0013025779, w: 0.014793269}
     - name: torso_socket_6
-      localPosition: {x: 0, y: 0.028101504, z: -0.010211713}
+      localPosition: {x: 0, y: 0.028101504, z: -0.010211709}
       localRotation: {x: -0.71752965, y: 0, z: 0, w: 0.69652796}
     - name: torso_socket_7
       localPosition: {x: 0, y: 0.09957966, z: -0.03708769}
       localRotation: {x: -0.71752965, y: 0, z: 0, w: 0.69652796}
     - name: torso_socket_8
-      localPosition: {x: 0.02306471, y: 0.04668482, z: -0.00054311013}
+      localPosition: {x: 0.023064712, y: 0.04668482, z: -0.0005431064}
       localRotation: {x: -0.010500444, y: -0.010500446, z: -0.70702887, w: 0.70702875}
     - name: torso_socket_9
-      localPosition: {x: 0.034938257, y: 0.10807263, z: -0.0023669975}
+      localPosition: {x: 0.034938253, y: 0.10807263, z: -0.0023669975}
       localRotation: {x: -0.010500297, y: -0.010500266, z: -0.7070288, w: 0.70702887}
     - name: torso_socket_10
-      localPosition: {x: 0.018178811, y: 0.004668278, z: 0.00070523476}
+      localPosition: {x: 0.018178811, y: 0.004668278, z: 0.00070523197}
       localRotation: {x: 0.99604255, y: 0.08762852, z: -0.0013025779, w: 0.014793269}
   allOrgans:
   - prefabName: batwing
-    organPrefab: {fileID: 919132149155446097, guid: 8bdc0dbd3aa2b4f44a73ebf539f56ccc, type: 3}
+    organPrefab: {fileID: 5836576159831001663, guid: cec244b6d938b214d8a2bc7e2d90ced0, type: 3}
     head:
       name: organ_socket_head
-      localPosition: {x: -0.00072794233, y: 0.019238587, z: -0.0113179935}
+      localPosition: {x: -0.00072795025, y: 0.019238584, z: -0.011317993}
       localRotation: {x: 0.5320924, y: -0.49896923, z: 0.4989691, w: -0.46790764}
     tail:
       name: organ_socket_tail
-      localPosition: {x: 0.000674451, y: 0.020455476, z: 0.010486294}
+      localPosition: {x: 0.00067445333, y: 0.020455481, z: 0.010486294}
       localRotation: {x: 0.46789342, y: -0.49871194, z: -0.4951855, w: 0.53586715}
     leaf:
       name: organ_socket_head
-      localPosition: {x: -0.00072794233, y: 0.019238587, z: -0.0113179935}
+      localPosition: {x: -0.00072795025, y: 0.019238584, z: -0.011317993}
       localRotation: {x: 0.5320924, y: -0.49896923, z: 0.4989691, w: -0.46790764}
   - prefabName: crowfeet
-    organPrefab: {fileID: 919132149155446097, guid: 1bdbdb99422e84b089b551b5c9f749ba, type: 3}
+    organPrefab: {fileID: 310039884529843233, guid: bed290789f1802548be28df5bf4284e2, type: 3}
     head:
       name: organ_socket_head
       localPosition: {x: -0.006971411, y: -0.0018157174, z: -0.000085504886}
@@ -2616,49 +2661,49 @@ MonoBehaviour:
       localPosition: {x: 0.007004354, y: 0.034757584, z: -0.00008316405}
       localRotation: {x: 0.5539792, y: 0.577332, z: -0.42707133, w: 0.42119467}
   - prefabName: crowhead
-    organPrefab: {fileID: 919132149155446097, guid: 213aca19756e34c25a28e11889505a7d, type: 3}
+    organPrefab: {fileID: 497550398173526890, guid: 98b974e3482c4d44181e0bdb0a0974a7, type: 3}
     head:
       name: organ_socket_head
-      localPosition: {x: 0.0000000106252465, y: -0.007028705, z: 0.011141405}
+      localPosition: {x: 0.000000010625248, y: -0.007028705, z: 0.011141405}
       localRotation: {x: 0.9649196, y: 0.00000015648907, z: -0.00000034508133, w: 0.2625456}
     tail:
       name: organ_socket_tail
-      localPosition: {x: 0.000000016118243, y: 0.0099326875, z: 0.016901236}
+      localPosition: {x: 0.000000016118237, y: 0.009932691, z: 0.016901236}
       localRotation: {x: 0.49665344, y: 0.0000005173372, z: -0.0000001776167, w: 0.86794907}
     leaf:
       name: organ_socket_head
-      localPosition: {x: 0.0000000106252465, y: -0.007028705, z: 0.011141405}
+      localPosition: {x: 0.000000010625248, y: -0.007028705, z: 0.011141405}
       localRotation: {x: 0.9649196, y: 0.00000015648907, z: -0.00000034508133, w: 0.2625456}
   - prefabName: ear
-    organPrefab: {fileID: 919132149155446097, guid: 0a9e84d6806394160bd7f8a6c6755bdd, type: 3}
+    organPrefab: {fileID: 7691709500239909019, guid: b0bd30e9f42657944b1edd0d842e15fe, type: 3}
     head:
       name: organ_socket_head
-      localPosition: {x: -0.0013175652, y: 0.017549496, z: -0.0012289985}
+      localPosition: {x: -0.0013175664, y: 0.017549496, z: -0.0012289995}
       localRotation: {x: -0.45084196, y: -0.0000000029938512, z: 0.11923358, w: 0.8846047}
     tail:
       name: organ_socket_tail
-      localPosition: {x: -0.00030020942, y: 0.007426964, z: 0.008223676}
+      localPosition: {x: -0.00030021006, y: 0.007426965, z: 0.008223676}
       localRotation: {x: -0.000000043437954, y: 0.450842, z: 0.8846046, w: -0.119233616}
     leaf:
       name: organ_socket_leaf
-      localPosition: {x: 0.011269203, y: 0.014917721, z: 0.0045986837}
+      localPosition: {x: 0.011269203, y: 0.014917722, z: 0.004598683}
       localRotation: {x: -0.31879345, y: -0.3187934, z: -0.5411991, w: 0.7098207}
   - prefabName: fish
-    organPrefab: {fileID: 919132149155446097, guid: a11a6d12a10bc482890ce4de2e937572, type: 3}
+    organPrefab: {fileID: 6261259851967393390, guid: e23689e34112c0c4987a028d6bd56bf6, type: 3}
     head:
       name: organ_socket_head
-      localPosition: {x: 0, y: -0.0062683094, z: 0}
+      localPosition: {x: -2.2204456e-18, y: -0.0062683057, z: 0}
       localRotation: {x: 0.7071069, y: -0.00000010536713, z: -0.7071068, w: -0.0000000842937}
     tail:
       name: organ_socket_tail
-      localPosition: {x: 0, y: 0.010016622, z: -0.013689094}
+      localPosition: {x: -2.2204452e-18, y: 0.01001662, z: -0.013689094}
       localRotation: {x: -0.7071069, y: 0, z: 0, w: 0.70710677}
     leaf:
       name: organ_socket_leaf
-      localPosition: {x: -1.6543612e-24, y: 0.03381674, z: 0.0019834684}
+      localPosition: {x: -2.2204456e-18, y: 0.03381674, z: 0.0019834684}
       localRotation: {x: 0, y: 0, z: 0, w: 1.0000001}
   - prefabName: hand
-    organPrefab: {fileID: 919132149155446097, guid: fbce8afd4803448b986615e7a4c93d98, type: 3}
+    organPrefab: {fileID: 8395106148611715694, guid: a73d1a5d82fa80b4b94f2ce1fbeea687, type: 3}
     head:
       name: organ_socket_head
       localPosition: {x: -0.0010169027, y: -0.0054449174, z: 0.00084099156}
@@ -2669,38 +2714,38 @@ MonoBehaviour:
       localRotation: {x: 0.64674723, y: -0.17987265, z: 0.39789513, w: 0.62533504}
     leaf:
       name: organ_socket_leaf
-      localPosition: {x: 0.00024705284, y: 0.06912692, z: 0.004841632}
+      localPosition: {x: 0.00024705424, y: 0.06912692, z: 0.004841632}
       localRotation: {x: 0.015723422, y: -0.23049071, z: 0.033065468, w: 0.97238564}
   - prefabName: leg
-    organPrefab: {fileID: 919132149155446097, guid: c78180cd69f9c4dd0850b36a2d04f8f0, type: 3}
+    organPrefab: {fileID: 5863374312025397354, guid: c7be8cc2c6fc3374f951600131131286, type: 3}
     head:
       name: organ_socket_head
-      localPosition: {x: -0.00017269429, y: -0.006826725, z: -0.0008439641}
+      localPosition: {x: -0.00017269401, y: -0.0068267253, z: -0.0008439641}
       localRotation: {x: 0.99400336, y: -0.004305576, z: -0.10065481, w: -0.042519797}
     tail:
       name: organ_socket_tail
-      localPosition: {x: -0.00052560074, y: 0.11983749, z: 0.008534036}
+      localPosition: {x: -0.00052560074, y: 0.11983747, z: 0.008534045}
       localRotation: {x: 0.042654563, y: 0.13897328, z: -0.0026600088, w: 0.9893738}
     leaf:
       name: organ_socket_leaf
       localPosition: {x: -0.014495901, y: 0.008793826, z: 0.0012916225}
       localRotation: {x: 0.5664356, y: -0.4700877, z: 0.42326224, w: 0.52822125}
   - prefabName: mantisbody
-    organPrefab: {fileID: 919132149155446097, guid: 0afaa37671a594c2aa2be1ae9ba1b9d5, type: 3}
+    organPrefab: {fileID: 2442175657626781789, guid: 5b03ca54d3612b044907659d782ab33f, type: 3}
     head:
       name: organ_socket_head
       localPosition: {x: 0.00058558193, y: -0.0016888701, z: -0.00017763296}
       localRotation: {x: 0.00000035637052, y: 0.009037562, z: 0.99995935, w: -0.00000008353084}
     tail:
       name: organ_socket_tail
-      localPosition: {x: -0.0014004519, y: 0.028452447, z: -0.039922625}
+      localPosition: {x: -0.0014004537, y: 0.028452447, z: -0.039922625}
       localRotation: {x: -0.7740262, y: 0.0017320694, z: -0.00031392474, w: 0.6331517}
     leaf:
       name: organ_socket_leaf
-      localPosition: {x: 0.000000004820322, y: 0.012776957, z: 0.006030644}
+      localPosition: {x: 0.000000003277819, y: 0.012776957, z: 0.006030644}
       localRotation: {x: 0.000000097474356, y: 0.68831587, z: 0.7254113, w: -0.0000002771724}
   - prefabName: mantishead
-    organPrefab: {fileID: 919132149155446097, guid: 0167d1ccd51fe41e488b2d27c5e77d7f, type: 3}
+    organPrefab: {fileID: 7285056203179667940, guid: e8fda1728c5067847b038177123c7f6d, type: 3}
     head:
       name: organ_socket_head
       localPosition: {x: 0.00038556888, y: 0.009054176, z: -0.00025061468}
@@ -2711,63 +2756,63 @@ MonoBehaviour:
       localRotation: {x: -0.5745702, y: 0.13476449, z: -0.09661044, w: 0.8014826}
     leaf:
       name: organ_socket_leaf
-      localPosition: {x: 0.0046020574, y: 0.04361822, z: 0.01707905}
+      localPosition: {x: 0.0046020565, y: 0.04361821, z: 0.017079048}
       localRotation: {x: 0.16258135, y: 0.0063119493, z: -0.038277246, w: 0.9859324}
   - prefabName: mantisleg
-    organPrefab: {fileID: 919132149155446097, guid: 85e3f8b7cee084db9b882c7a3975f53b, type: 3}
+    organPrefab: {fileID: 4762786622231615149, guid: eb95f6c9690300847b72bb529b483f82, type: 3}
     head:
       name: organ_socket_head
-      localPosition: {x: -0.00018049462, y: -0.0036446229, z: 0.002546627}
+      localPosition: {x: -0.00018049416, y: -0.0036446196, z: 0.0025466292}
       localRotation: {x: 0.016117672, y: 0.056345068, z: 0.9974914, w: 0.0397048}
     tail:
       name: organ_socket_tail
-      localPosition: {x: 0.002593263, y: 0.04396839, z: -0.00478703}
+      localPosition: {x: 0.0025932603, y: 0.04396839, z: -0.0047870264}
       localRotation: {x: 0.05655548, y: 0.99820817, z: -0.0150331305, w: -0.012497452}
     leaf:
       name: organ_socket_head
-      localPosition: {x: -0.00018049462, y: -0.0036446229, z: 0.002546627}
+      localPosition: {x: -0.00018049416, y: -0.0036446196, z: 0.0025466292}
       localRotation: {x: 0.016117672, y: 0.056345068, z: 0.9974914, w: 0.0397048}
   - prefabName: mouth
-    organPrefab: {fileID: 919132149155446097, guid: 64a0002a3a7314118ac8f7f9f882aa25, type: 3}
+    organPrefab: {fileID: 2194896096648431919, guid: 23db5d50b3b90c6499c3433bfca5d1b0, type: 3}
     head:
       name: organ_socket_head
-      localPosition: {x: 0, y: -0.016220326, z: -0.00066627224}
+      localPosition: {x: 0.000000002240995, y: -0.016220326, z: -0.00066627224}
       localRotation: {x: 0.98842704, y: 0, z: 0, w: 0.15169816}
     tail:
       name: organ_socket_tail
-      localPosition: {x: 0, y: 0.03234258, z: -0.013452078}
+      localPosition: {x: 0.000000002240995, y: 0.03234258, z: -0.013452078}
       localRotation: {x: 0.0000000021788416, y: 0.988427, z: -0.15169832, w: -0.00000013505158}
     leaf:
       name: organ_socket_leaf
-      localPosition: {x: 0, y: 0.0039522354, z: -0.029274432}
+      localPosition: {x: 0.000000002240995, y: 0.0039522345, z: -0.029274432}
       localRotation: {x: -0.8061902, y: 0, z: 0, w: 0.5916566}
   - prefabName: tentacle
-    organPrefab: {fileID: 919132149155446097, guid: 92137f9d494194152be91cfd109615a0, type: 3}
+    organPrefab: {fileID: 6232404658261373116, guid: 57d248a2b80ad574cb8822adb0cd0baa, type: 3}
     head:
       name: organ_socket_head
       localPosition: {x: 0, y: -0.0042857993, z: 0}
       localRotation: {x: 1, y: 1.1013529e-14, z: -0.00000007549791, w: 0.00000017881393}
     tail:
       name: organ_socket_tail
-      localPosition: {x: 0.0030338007, y: 0.021619994, z: 0.012451545}
+      localPosition: {x: 0.0030338, y: 0.021619996, z: 0.0124515435}
       localRotation: {x: 0.00000009415696, y: 0.7071069, z: 0.70710677, w: 0.00000009415696}
     leaf:
       name: organ_socket_head
       localPosition: {x: 0, y: -0.0042857993, z: 0}
       localRotation: {x: 1, y: 1.1013529e-14, z: -0.00000007549791, w: 0.00000017881393}
   - prefabName: tentacle2
-    organPrefab: {fileID: 919132149155446097, guid: d6119af8ad1754d8ea389cc84262b04c, type: 3}
+    organPrefab: {fileID: 5218685614725266073, guid: 7050b9be597080b4f943cef8b2615cb9, type: 3}
     head:
       name: organ_socket_head
-      localPosition: {x: 0, y: -0.0012570454, z: 0}
+      localPosition: {x: 0, y: -0.0012570454, z: -2.3283064e-10}
       localRotation: {x: 1, y: 1.1013529e-14, z: -0.00000007549791, w: 0.00000017881393}
     tail:
       name: organ_socket_tail
-      localPosition: {x: 0.00067810377, y: 0.02027388, z: -0.0074036215}
+      localPosition: {x: 0.00067810534, y: 0.02027388, z: -0.0074036215}
       localRotation: {x: -0.7071069, y: -0.000000030106552, z: -0.000000030106552, w: 0.70710677}
     leaf:
       name: organ_socket_head
-      localPosition: {x: 0, y: -0.0012570454, z: 0}
+      localPosition: {x: 0, y: -0.0012570454, z: -2.3283064e-10}
       localRotation: {x: 1, y: 1.1013529e-14, z: -0.00000007549791, w: 0.00000017881393}
 --- !u!4 &426762142
 Transform:
@@ -4314,7 +4359,7 @@ Transform:
   m_GameObject: {fileID: 1153930973}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -307.98883, y: -533.04565, z: -10}
+  m_LocalPosition: {x: -307.98883, y: -533.04565, z: -15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4590,7 +4635,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -6128,17 +6173,61 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_Pivot.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8936829569960222292, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_Pivot.y
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_AnchorMax.y
@@ -6146,31 +6235,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 1134
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 768
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 1.9287918
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1
+      value: 1.9287918
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1
+      value: 1.9287918
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6202,7 +6291,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: -49
       objectReference: {fileID: 0}
     - target: {fileID: 9082581754058844086, guid: 02863d76046f842c8b40be399c44dbea, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -8779,6 +8868,7 @@ SceneRoots:
   - {fileID: 2048817683}
   - {fileID: 1746386595}
   - {fileID: 1409169399}
+  - {fileID: 92889469}
   - {fileID: 1343874867}
   - {fileID: 153782349}
   - {fileID: 2062708208}

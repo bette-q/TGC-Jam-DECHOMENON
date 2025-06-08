@@ -109,6 +109,7 @@ public class ComboManager : MonoBehaviour
             prev = inst;
         }
 
+        comboRoot.GetComponentInChildren<Animator>().SetTrigger("ActionStart");
         // 3) Layer it
         LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
 

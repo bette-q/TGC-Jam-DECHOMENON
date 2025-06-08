@@ -84,6 +84,16 @@ public class SocketManager : MonoBehaviour
             });
         }
     }
+    private void ClearSocket(int i)
+    {
+        if (attached.TryGetValue(i, out var oldCombo))
+        {
+            // you might want to add some fade-out or pooling instead of Destroy
+            Destroy(oldCombo);
+            attached.Remove(i);
+        }
+
+    }
     public void AttachRandom(GameObject comboRoot, bool isGreen)
     {
         LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
@@ -99,6 +109,8 @@ public class SocketManager : MonoBehaviour
         int idx = isGreen
             ? Random.Range(0, maxGreen)
             : Random.Range(0, runtimeBindings.Count);
+
+        ClearSocket(idx);
 
         // 2) Pull the *one* organ you want to attach *for this test* out of the combo container
         //    (assuming your comboRoot has exactly one direct child when you're calling AttachRandom)

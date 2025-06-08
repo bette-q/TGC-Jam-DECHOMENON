@@ -36,32 +36,40 @@ public class ConstructPanelController : MonoBehaviour
 
     private void OnSlotChangedHandler(int slotIndex, DraggableCard newCard)
     {
-        // If a card was dropped into this slot:
+        if (slotIndex != 0) return;
+
         if (newCard != null && newCard.organCard != null)
         {
-            // Clear any previous preview
             viewHelper.ClearPreview();
-
-            // Show the new prefab under the same preview camera
             _currentPreviewRoot = viewHelper.ShowPreview(newCard.organCard.organPrefab);
-
-            // Tell the camera control what to rotate/zoom
-            if (playerCameraControl != null && _currentPreviewRoot != null)
-            {
+            if (playerCameraControl != null)
                 playerCameraControl.viewRoot = _currentPreviewRoot.transform;
+
+            // Look for the Animator on any child
+            var anim = _currentPreviewRoot.GetComponentInChildren<Animator>();
+            if (anim != null)
+            {
+                anim.ResetTrigger("ActionStop");
+                anim.SetTrigger("ActionStart");
+            }
+            else
+            {
+                Debug.LogWarning("No Animator found under preview root!");
             }
         }
-        else
+        else if (_currentPreviewRoot != null)
         {
-            // Slot emptied or card removed: clear the preview
-            viewHelper.ClearPreview();
-            if (playerCameraControl != null)
+            var anim = _currentPreviewRoot.GetComponentInChildren<Animator>();
+            if (anim != null)
             {
-                playerCameraControl.viewRoot = null;
+                anim.ResetTrigger("ActionStart");
+                anim.SetTrigger("ActionStop");
             }
-            _currentPreviewRoot = null;
         }
     }
+
+
+
 
     private void OnInputClicked()
     {
