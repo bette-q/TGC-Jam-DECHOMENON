@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &8984891630765465909
+--- !u!1001 &8037721029813068474
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: e97c8d73b1b47427f94db937e25a37a6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 6.5260005
+      value: -5.4089813
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e97c8d73b1b47427f94db937e25a37a6, type: 3}
       propertyPath: m_LocalPosition.y
@@ -18,7 +18,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e97c8d73b1b47427f94db937e25a37a6, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 9.374719
+      value: -18.314047
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e97c8d73b1b47427f94db937e25a37a6, type: 3}
       propertyPath: m_LocalRotation.w
@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e97c8d73b1b47427f94db937e25a37a6, type: 3}
       propertyPath: m_Name
-      value: Torso
+      value: Torso 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
