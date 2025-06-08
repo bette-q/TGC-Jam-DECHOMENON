@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Halftone_Green
+  m_Name: Halftone_SmallObject
   m_Shader: {fileID: 4800000, guid: 60e29b7951f20da47b11861d166b7036, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -219,7 +219,7 @@ Material:
     - _StepOffset: 0.021
     - _Strength: 0
     - _Surface: 0
-    - _Thicnkess: 0.0002
+    - _Thicnkess: 0.0001
     - _UVAnimationSpeed: 0
     - _UVAnimationSpeedSpec: 0
     - _UVAnimationSpeedWarp: 0
