@@ -3,7 +3,32 @@ guid: 213aca19756e34c25a28e11889505a7d
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: CarrionCrow_Body.001
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: CarrionCrow_Eyelid
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: CarrionCrow_Pupil
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: CarrionCrow_Tongue
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Halftone.008
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
