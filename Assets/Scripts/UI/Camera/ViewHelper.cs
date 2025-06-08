@@ -85,6 +85,39 @@ public class ViewHelper : MonoBehaviour
 
         //flip to front
         instance.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+
+        // 5) Return the root to the caller (so they can assign it to a camera controller)
+        return _currentRoot;
+    }
+
+
+
+    public GameObject ShowVisual(GameObject prefab)
+    {
+        ClearPreview();
+        if (prefab == null) return null;
+
+        // 1) Create an empty root at world origin
+        _currentRoot = new GameObject("ViewRoot_" + prefab.name);
+        _currentRoot.transform.position = Vector3.zero;
+        _currentRoot.transform.rotation = Quaternion.identity;
+        _currentRoot.transform.localScale = Vector3.one;
+
+        // 2) Instantiate the actual prefab as a child of that root
+        GameObject instance = Instantiate(prefab, _currentRoot.transform, worldPositionStays: false);
+        _currentInstance = instance;
+
+        // 3) Recursively set the root (and all children) to our view layer
+        SetLayerRecursive(_currentRoot, ViewLayer);
+
+        // 4) Center the instance under the root
+        instance.transform.localPosition = Vector3.zero;
+        instance.transform.localRotation = Quaternion.identity;
+        instance.transform.localScale = Vector3.one * 0.8f;
+
+        //flip to front
+        instance.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+
         // 5) Return the root to the caller (so they can assign it to a camera controller)
         return _currentRoot;
     }

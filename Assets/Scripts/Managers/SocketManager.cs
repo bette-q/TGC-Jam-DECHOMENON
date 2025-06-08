@@ -4,9 +4,9 @@ using System.Collections.Generic;
 [System.Serializable]
 public class SocketBinding
 {
-    public string socketName;     // e.g. "torso_socket_0"
-    public Transform socket;      // the generated socket transform under torsoRoot
-    public Transform comboAnchor; // child named "comboAnchor"
+    public string socketName;     
+    public Transform socket;      
+    public Transform comboAnchor; 
 }
 
 public class SocketManager : MonoBehaviour
@@ -15,12 +15,8 @@ public class SocketManager : MonoBehaviour
     private List<SocketBinding> runtimeBindings = new List<SocketBinding>();
     private Dictionary<int, GameObject> attached = new Dictionary<int, GameObject>();
 
-    [Tooltip("How many of the first sockets count as green")]
     [SerializeField] private int greenSocketCt = 6;
 
-    /// <summary>
-    /// Call this with the instantiated torso GameObject.
-    /// </summary>
     public void SetTorso(GameObject torsoInstance)
     {
         // 1) find the correct "torso_root" on this instance
@@ -84,6 +80,20 @@ public class SocketManager : MonoBehaviour
             });
         }
     }
+    public List<SocketBinding> GetActiveBindings()
+    {
+        return runtimeBindings;
+    }
+    private void ClearSocket(int i)
+    {
+        if (attached.TryGetValue(i, out var oldCombo))
+        {
+            // you might want to add some fade-out or pooling instead of Destroy
+            Destroy(oldCombo);
+            attached.Remove(i);
+        }
+
+    }
     public void AttachRandom(GameObject comboRoot, bool isGreen)
     {
         LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
@@ -99,6 +109,8 @@ public class SocketManager : MonoBehaviour
         int idx = isGreen
             ? Random.Range(0, maxGreen)
             : Random.Range(0, runtimeBindings.Count);
+
+        ClearSocket(idx);
 
         // 2) Pull the *one* organ you want to attach *for this test* out of the combo container
         //    (assuming your comboRoot has exactly one direct child when you're calling AttachRandom)
@@ -129,43 +141,51 @@ public class SocketManager : MonoBehaviour
         var sb = runtimeBindings[i];
         Transform socketGO = sb.socket;               // this is the GameObject you created in BindSockets
         Transform attachPoint = sb.comboAnchor;       // for final parenting
+                                                      // 
+        var db = SocketDatabase.Instance
+             ?? Object.FindFirstObjectByType<SocketDatabase>();
+        if (db == null) { Debug.LogError("SocketManager: No SocketDatabase."); return; }
 
-        // 2) Find the organ_root on the *organ* instance
-        Transform childRoot = SocketDatabase.Instance.GetOrganRoot(organGO);
+        Transform childRoot = db.GetOrganRoot(organGO);
         if (childRoot == null)
         {
             Debug.LogError("SocketManager: no organ_root on " + organGO.name);
             return;
         }
 
-        // 3) Find the head socket in that hierarchy
-        Transform headSocket = childRoot.Find("organ_socket_head");
-        if (headSocket == null)
-        {
-            Debug.LogError("SocketManager: no organ_socket_head under organ_root");
-            return;
-        }
+        // B) Look-up OrganData so we can use the head socket offsets
+        string prefabName = organGO.name.Replace("(Clone)", "");
+        OrganData cd = db.GetOrganData(prefabName);
+        if (cd == null) { Debug.LogError("SocketManager: no OrganData for " + prefabName); return; }
 
-        // 4) Record child socket world‐pose *before* we move anything
-        Vector3 childWS0 = headSocket.position;
-        Quaternion childRot0 = headSocket.rotation;
+        // We always attach HEAD → torso socket here
+        var cEntry = cd.head;
 
-        // 5) Record torso socket world‐pose from the *actual* socket GO
-        Vector3 parentWS = socketGO.position;
-        Quaternion parentRot = socketGO.rotation;
+        // 2) Compute *world* socket frames BEFORE we move anything
+        Vector3 pPosWS = socketGO.position;
+        Quaternion pRotWS = socketGO.rotation;
 
-        // 6) Rotate the *whole* organ so its socket frame matches the torso
-        Quaternion deltaR = parentRot * Quaternion.Inverse(childRot0);
-        organGO.transform.rotation = deltaR * organGO.transform.rotation;
+        Vector3 cPosWS = childRoot.TransformPoint(cEntry.localPosition);
+        Quaternion cRotWS = childRoot.rotation * cEntry.localRotation;
 
-        // 7) Re‐sample the child socket’s world‐pos *after* rotation
-        childWS0 = headSocket.position;
+        // 3) Rotate organ so its head socket frame matches the torso socket frame
+        Quaternion deltaR = pRotWS * Quaternion.Inverse(cRotWS);
 
-        // 8) Translate the organ so the sockets coincide
-        Vector3 deltaP = parentWS - childWS0;
+        // Optional 180° flip around local X (same trick used in Attach)
+        Vector3 socketX = pRotWS * Vector3.right;
+        Quaternion flipX = Quaternion.AngleAxis(180f, socketX);
+        Quaternion fullR = flipX * deltaR;
+
+        organGO.transform.rotation = fullR * organGO.transform.rotation;
+
+        // 4) Re-sample child socket position AFTER rotation
+        Vector3 cPosWS2 = childRoot.TransformPoint(cEntry.localPosition);
+
+        // 5) Translate so the two sockets coincide
+        Vector3 deltaP = pPosWS - cPosWS2;
         organGO.transform.position += deltaP;
 
-        // 9) Parent the organ under the socket anchor so it stays attached
+        // 6) Finally parent under the socket anchor so it stays attached
         organGO.transform.SetParent(attachPoint, true);
     }
 

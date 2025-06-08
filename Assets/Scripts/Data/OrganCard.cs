@@ -14,11 +14,13 @@ public class OrganCard
     public string organName;
     public OrganType curType;
     private OrganType originalType;
+    public GameObject previewPrefab;
 
     public OrganCard(GameObject prefab)
     {
         organPrefab = prefab;
         organName = prefab.name;
+        previewPrefab = null;
         AssignRandomType();
     }
     public void AssignRandomType()
