@@ -85,6 +85,7 @@ public class ViewHelper : MonoBehaviour
 
         //flip to front
         instance.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+
         // 5) Return the root to the caller (so they can assign it to a camera controller)
         return _currentRoot;
     }

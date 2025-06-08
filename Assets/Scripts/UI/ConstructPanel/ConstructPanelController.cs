@@ -18,7 +18,7 @@ public class ConstructPanelController : MonoBehaviour
     [Header("Preview Camera Setup")]
     public PlayerCameraControl playerCameraControl;
     public ViewHelper viewHelper;
-    private GameObject _currentPreviewRoot = null;
+    private GameObject curPreviewRoot = null;
 
     // Track if we've already warned about a red combo
     private bool waitingForRedConfirmation = false;
@@ -36,40 +36,16 @@ public class ConstructPanelController : MonoBehaviour
 
     private void OnSlotChangedHandler(int slotIndex, DraggableCard newCard)
     {
-        if (slotIndex != 0) return;
-
         if (newCard != null && newCard.organCard != null)
         {
             viewHelper.ClearPreview();
-            _currentPreviewRoot = viewHelper.ShowPreview(newCard.organCard.organPrefab);
+            curPreviewRoot = viewHelper.ShowPreview(newCard.organCard.organPrefab);
             if (playerCameraControl != null)
-                playerCameraControl.viewRoot = _currentPreviewRoot.transform;
+                playerCameraControl.viewRoot = curPreviewRoot.transform;
 
-            // Look for the Animator on any child
-            var anim = _currentPreviewRoot.GetComponentInChildren<Animator>();
-            if (anim != null)
-            {
-                anim.ResetTrigger("ActionStop");
-                anim.SetTrigger("InvalidAction");
-            }
-            else
-            {
-                Debug.LogWarning("No Animator found under preview root!");
-            }
         }
-        else if (_currentPreviewRoot != null)
-        {
-            var anim = _currentPreviewRoot.GetComponentInChildren<Animator>();
-            if (anim != null)
-            {
-                anim.ResetTrigger("InvalidAction");
-                anim.SetTrigger("ActionStop");
-            }
-        }
+  
     }
-
-
-
 
     private void OnInputClicked()
     {
@@ -147,7 +123,7 @@ public class ConstructPanelController : MonoBehaviour
         viewHelper.ClearPreview();
         if (playerCameraControl != null)
             playerCameraControl.viewRoot = null;
-        _currentPreviewRoot = null;
+        curPreviewRoot = null;
     }
 
 }
