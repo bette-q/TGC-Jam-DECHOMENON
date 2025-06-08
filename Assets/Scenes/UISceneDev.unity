@@ -3846,11 +3846,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slots:
-  - {fileID: 1676987859}
-  - {fileID: 1913795203}
-  - {fileID: 134538759}
-  - {fileID: 1427447176}
-  - {fileID: 214152838}
+  - {fileID: 597546584}
+  - {fileID: 758825947}
+  - {fileID: 2013986250}
+  - {fileID: 1424601863}
+  - {fileID: 119611651}
   inputButton: {fileID: 1833127602}
   infoText: {fileID: 480147116}
   comboManager: {fileID: 2048817682}
@@ -6630,7 +6630,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 8400000, guid: 26e385fdf9e3d764382264b01d1f038d, type: 2}
+  m_Texture: {fileID: 0}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -16624,7 +16624,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 8400000, guid: 26e385fdf9e3d764382264b01d1f038d, type: 2}
+  m_Texture: {fileID: 0}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -17270,7 +17270,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 8400000, guid: bc3d0d4b0719c834e97679ab21e8a467, type: 2}
+  m_Texture: {fileID: 0}
   m_UVRect:
     serializedVersion: 2
     x: 0
