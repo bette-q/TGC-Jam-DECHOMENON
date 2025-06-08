@@ -1,5 +1,6 @@
 // File: Assets/Scripts/VisualPanelController.cs
 using UnityEngine;
+using UnityEngine.UI;
 
 public class VisualPanelController : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class VisualPanelController : MonoBehaviour
 
     [Header("Socket Manager")]
     public SocketManager socketManager;
+
+    [Header("Torso Motion Controller")]
+    public TorsoMotionController torsoMotionController;
 
     private GameObject _currentPreview;
 
@@ -33,6 +37,26 @@ public class VisualPanelController : MonoBehaviour
 
             // 4) Bind sockets using the new API
             socketManager.SetTorso(_currentPreview);
+
+            // 4) Hook up motion controller
+            if (torsoMotionController != null)
+            {
+                // Assign the preview root as the torso root
+                torsoMotionController.torsoRoot = _currentPreview.transform;
+
+                // If any organ combos are already attached, register their anchors:
+                foreach (var binding in socketManager.GetActiveBindings())
+                {
+                    torsoMotionController.RegisterNewAnchor(binding.comboAnchor);
+                }  
+
+                // Reset internal state to avoid first-frame spikes
+                torsoMotionController.ResetMotionState();
+            }
+        }
+        else
+        {
+            Debug.LogError("VisualPanelController: No default torso prefab found in SocketDatabase.");
         }
     }
 
@@ -64,6 +88,15 @@ public class VisualPanelController : MonoBehaviour
 
         // 4) Re-bind sockets for the new torso
         socketManager.SetTorso(_currentPreview);
+
+        if (torsoMotionController != null)
+        {
+            torsoMotionController.torsoRoot = _currentPreview.transform;
+            foreach (var binding in socketManager.GetActiveBindings())
+                torsoMotionController.RegisterNewAnchor(binding.comboAnchor);
+
+            torsoMotionController.ResetMotionState();
+        }
     }
 
     public void ClearVisual()
@@ -72,5 +105,8 @@ public class VisualPanelController : MonoBehaviour
         if (playerCameraControl != null)
             playerCameraControl.viewRoot = null;
         _currentPreview = null;
+
+        if (torsoMotionController != null)
+            torsoMotionController.ResetMotionState();
     }
 }

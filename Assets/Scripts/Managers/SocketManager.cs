@@ -4,9 +4,9 @@ using System.Collections.Generic;
 [System.Serializable]
 public class SocketBinding
 {
-    public string socketName;     // e.g. "torso_socket_0"
-    public Transform socket;      // the generated socket transform under torsoRoot
-    public Transform comboAnchor; // child named "comboAnchor"
+    public string socketName;     
+    public Transform socket;      
+    public Transform comboAnchor; 
 }
 
 public class SocketManager : MonoBehaviour
@@ -15,12 +15,8 @@ public class SocketManager : MonoBehaviour
     private List<SocketBinding> runtimeBindings = new List<SocketBinding>();
     private Dictionary<int, GameObject> attached = new Dictionary<int, GameObject>();
 
-    [Tooltip("How many of the first sockets count as green")]
     [SerializeField] private int greenSocketCt = 6;
 
-    /// <summary>
-    /// Call this with the instantiated torso GameObject.
-    /// </summary>
     public void SetTorso(GameObject torsoInstance)
     {
         // 1) find the correct "torso_root" on this instance
@@ -83,6 +79,10 @@ public class SocketManager : MonoBehaviour
                 comboAnchor = anchorGO.transform
             });
         }
+    }
+    public List<SocketBinding> GetActiveBindings()
+    {
+        return runtimeBindings;
     }
     private void ClearSocket(int i)
     {
