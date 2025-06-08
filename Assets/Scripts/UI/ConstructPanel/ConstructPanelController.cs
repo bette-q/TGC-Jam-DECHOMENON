@@ -5,7 +5,7 @@ using static CardDropSlot;
 
 public class ConstructPanelController : MonoBehaviour
 {
-    [Header("Drag & Drop Slots (0¨C4)")]
+    [Header("Drag & Drop Slots (0ï¿½C4)")]
     public CardDropSlot[] slots = new CardDropSlot[5];
 
     [Header("UI Elements")]
@@ -19,6 +19,9 @@ public class ConstructPanelController : MonoBehaviour
     public PlayerCameraControl playerCameraControl;
     public ViewHelper viewHelper;
     private GameObject _currentPreviewRoot = null;
+
+    [Header("Fullscreen Management")]
+    public FullscreenManager fullscreenManager;
 
     // Track if we've already warned about a red combo
     private bool waitingForRedConfirmation = false;
@@ -71,7 +74,7 @@ public class ConstructPanelController : MonoBehaviour
             return;
         }
 
-        //Collect each slot¡¯s 3D prefab and OrganCard data in slot order
+        //Collect each slotï¿½ï¿½s 3D prefab and OrganCard data in slot order
         List<GameObject> arrangedPrefabs = new List<GameObject>();
         List<OrganCard> arrangedCards = new List<OrganCard>();
 
@@ -89,7 +92,7 @@ public class ConstructPanelController : MonoBehaviour
             }
         }
 
-        //¡°Green combo¡± check (root = first, terminal = last, conductors = middle)
+        //ï¿½ï¿½Green comboï¿½ï¿½ check (root = first, terminal = last, conductors = middle)
         OrganCard rootCard = arrangedCards[0];
         OrganCard terminalCard = arrangedCards[arrangedCards.Count - 1];
         List<OrganCard> conductorCards = arrangedCards.GetRange(1, arrangedCards.Count - 2);
@@ -109,7 +112,7 @@ public class ConstructPanelController : MonoBehaviour
             return;
         }
 
-        //Either it¡¯s already green, or the player confirmed a red combo
+        //Either itï¿½ï¿½s already green, or the player confirmed a red combo
         waitingForRedConfirmation = false;
         HighlightSlots(Color.white);
         infoText.text = "";
@@ -117,6 +120,16 @@ public class ConstructPanelController : MonoBehaviour
         comboManager.BuildFromOrder(arrangedPrefabs, isGreen);
 
         ClearAllSlots();
+        
+        // è¿›å…¥å…¨å±æ¨¡å¼æ˜¾ç¤ºå™¨å®˜é¢æ¿
+        if (fullscreenManager != null)
+        {
+            fullscreenManager.EnterFullscreen();
+        }
+        else
+        {
+            Debug.LogWarning("ConstructPanelController: FullscreenManager is not assigned!");
+        }
     }
 
     private void HighlightSlots(Color c)
