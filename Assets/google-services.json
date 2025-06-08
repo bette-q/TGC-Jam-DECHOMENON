@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "886175571934",
+    "project_id": "tgc-torsocombo",
+    "storage_bucket": "tgc-torsocombo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:886175571934:android:616cd879e1dee24712874f",
+        "android_client_info": {
+          "package_name": "com.torso.combo.tgc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFnCh_5qxNlgJLG6GwwqvAmhTp0yBKsqc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
