@@ -132,9 +132,5 @@ public class ComboManager : MonoBehaviour
     
 }
 
-// ComboManager.cs  ────────────────────────────────────────────────────────────
-// UPDATED AttachBodyPart – now uses the same math as Attach(..)
-// ─────────────────────────────────────────────────────────────────────────────
-
 
 
