@@ -3,7 +3,12 @@ guid: a11a6d12a10bc482890ce4de2e937572
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Halftone.006
+    second: {fileID: 2100000, guid: 967a87d8116194a27a126929828ff282, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
