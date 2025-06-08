@@ -5,12 +5,14 @@ using static CardDropSlot;
 
 public class ConstructPanelController : MonoBehaviour
 {
-    [Header("Drag & Drop Slots (0¨C4)")]
+    [Header("Drag & Drop Slots (0?C4)")]
     public CardDropSlot[] slots = new CardDropSlot[5];
 
     [Header("UI Elements")]
     public Button inputButton;
     public Text infoText;
+    public Animator panelAnimator;
+    public GameObject startPanel;
 
     [Header("Combo System")]
     public ComboManager comboManager;
@@ -27,12 +29,14 @@ public class ConstructPanelController : MonoBehaviour
     {
         inputButton.onClick.AddListener(OnInputClicked);
 
+
         //hook up preview callback
         foreach (var slot in slots)
         {
             slot.OnSlotChanged += OnSlotChangedHandler;
         }
     }
+
 
     private void OnSlotChangedHandler(int slotIndex, DraggableCard newCard)
     {
@@ -55,7 +59,7 @@ public class ConstructPanelController : MonoBehaviour
             return;
         }
 
-        //Collect each slot¡¯s 3D prefab and OrganCard data in slot order
+        //Collect each slot??s 3D prefab and OrganCard data in slot order
         List<GameObject> arrangedPrefabs = new List<GameObject>();
         List<OrganCard> arrangedCards = new List<OrganCard>();
 
@@ -73,7 +77,7 @@ public class ConstructPanelController : MonoBehaviour
             }
         }
 
-        //¡°Green combo¡± check (root = first, terminal = last, conductors = middle)
+        //??Green combo?? check (root = first, terminal = last, conductors = middle)
         OrganCard rootCard = arrangedCards[0];
         OrganCard terminalCard = arrangedCards[arrangedCards.Count - 1];
         List<OrganCard> conductorCards = arrangedCards.GetRange(1, arrangedCards.Count - 2);
@@ -93,10 +97,16 @@ public class ConstructPanelController : MonoBehaviour
             return;
         }
 
-        //Either it¡¯s already green, or the player confirmed a red combo
+        //Either it??s already green, or the player confirmed a red combo
+        // animator added here
+        panelAnimator.SetTrigger("Input");
+        startPanel.SetActive(true);
+
         waitingForRedConfirmation = false;
         HighlightSlots(Color.white);
         infoText.text = "";
+
+        
 
         comboManager.BuildFromOrder(arrangedPrefabs, isGreen);
 
@@ -127,3 +137,4 @@ public class ConstructPanelController : MonoBehaviour
     }
 
 }
+
