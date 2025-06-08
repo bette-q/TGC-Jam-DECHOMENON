@@ -50,7 +50,7 @@ public class ConstructPanelController : MonoBehaviour
             if (anim != null)
             {
                 anim.ResetTrigger("ActionStop");
-                anim.SetTrigger("ActionStart");
+                anim.SetTrigger("InvalidAction");
             }
             else
             {
@@ -62,7 +62,7 @@ public class ConstructPanelController : MonoBehaviour
             var anim = _currentPreviewRoot.GetComponentInChildren<Animator>();
             if (anim != null)
             {
-                anim.ResetTrigger("ActionStart");
+                anim.ResetTrigger("InvalidAction");
                 anim.SetTrigger("ActionStop");
             }
         }

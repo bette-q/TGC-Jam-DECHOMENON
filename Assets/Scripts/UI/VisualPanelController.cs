@@ -1,4 +1,5 @@
 // File: Assets/Scripts/VisualPanelController.cs
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,7 @@ public class VisualPanelController : MonoBehaviour
     public TorsoMotionController torsoMotionController;
 
     private GameObject _currentPreview;
+    //public static event Action<Transform> OnTorsoReady;
 
     private void Start()
     {
@@ -48,11 +50,12 @@ public class VisualPanelController : MonoBehaviour
                 foreach (var binding in socketManager.GetActiveBindings())
                 {
                     torsoMotionController.RegisterNewAnchor(binding.comboAnchor);
-                }  
+                }
 
                 // Reset internal state to avoid first-frame spikes
                 torsoMotionController.ResetMotionState();
             }
+            //OnTorsoReady?.Invoke(_currentPreview.transform);
         }
         else
         {

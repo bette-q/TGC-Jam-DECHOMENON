@@ -109,7 +109,31 @@ public class ComboManager : MonoBehaviour
             prev = inst;
         }
 
-        comboRoot.GetComponentInChildren<Animator>().SetTrigger("ActionStart");
+
+        // 3) Trigger animations based on combo validity
+        if (isGreen)
+        {
+            // Valid combo: trigger on all parts
+            foreach (var anim in comboRoot.GetComponentsInChildren<Animator>())
+                anim.SetTrigger("ValidAction");
+        }
+        else
+        {
+            // Invalid combo: trigger only on the root part
+            if (comboRoot.transform.childCount > 0)
+            {
+                var rootAnim = comboRoot.transform.GetChild(0).GetComponent<Animator>();
+                if (rootAnim != null)
+                    rootAnim.SetTrigger("InvalidAction");
+            }
+        }
+
+        //// tell the driver to follow our root organ (first prefab in the chain)
+        //var driver = Object.FindFirstObjectByType<SingleOrganMotionDriver>();
+        //if (driver != null && comboRoot != null)
+        //    driver.SetActiveOrgan(comboRoot.transform);
+
+
         // 3) Layer it
         LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
 

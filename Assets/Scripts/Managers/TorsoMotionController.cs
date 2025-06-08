@@ -90,25 +90,6 @@ public class TorsoMotionController : MonoBehaviour
             t
         );
 
-        /*       // compute how much to expand bounds based on pull strength
-               float pullStrength = summedPull.magnitude;              // how ¡°hard¡± the organs are tugging
-               float dynamicScale = 1f + Mathf.Clamp01(pullStrength * 2f);
-
-               // instead of Vector3.Scale(maxLocalOffset, dynamicScale * 0.5f),
-               // just multiply the vector by your scalar:
-               Vector3 halfBounds = maxLocalOffset * (dynamicScale * 0.5f);
-
-               // now clamp local.x/y within those half-bounds
-               Vector3 local = torsoRoot.localPosition;
-               local.x = Mathf.Clamp(local.x,
-                   _initialLocalPos.x - halfBounds.x,
-                   _initialLocalPos.x + halfBounds.x);
-               local.y = Mathf.Clamp(local.y,
-                   _initialLocalPos.y - halfBounds.y,
-                   _initialLocalPos.y + halfBounds.y);
-               local.z = _initialLocalPos.z;
-               torsoRoot.localPosition = local;*/
-
         Vector3 local = torsoRoot.localPosition;
         Vector3 offset = local - _initialLocalPos;
         if (offset.magnitude > maxLocalOffset)
