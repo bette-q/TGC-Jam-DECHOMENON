@@ -1582,6 +1582,7 @@ MonoBehaviour:
   comboManager: {fileID: 0}
   playerCameraControl: {fileID: 0}
   viewHelper: {fileID: 0}
+  fullscreenManager: {fileID: 0}
 --- !u!1 &2531232902329201106
 GameObject:
   m_ObjectHideFlags: 0
