@@ -85,27 +85,27 @@ public class ComboManager : MonoBehaviour
             inst.transform.localScale = Vector3.one;
             inst.transform.SetParent(comboRoot.transform, false);
 
-/*            var anim = inst.GetComponentInChildren<Animator>();
-            if (isGreen)
+            var animators = inst.GetComponentsInChildren<Animator>(true);
+            foreach (var anim in animators)
             {
-                anim.ResetTrigger("ToValid");
-                anim.SetTrigger("ToValid");
-            }
-            else
-            {
-                if (i == 0)
+                if (isGreen)
                 {
-                    continue;
+                    // Entire combo goes “valid”
+                    anim.ResetTrigger("ActionStop");
+                    anim.ResetTrigger("ToValid");
+                    anim.SetTrigger("ToValid");
                 }
                 else
                 {
-                    anim.ResetTrigger("ActionStop");
-                    anim.SetTrigger("ActionStop");
+                    // Only NON-root pieces stop their action
+                    if (i != 0)
+                    {
+                        anim.ResetTrigger("ToValid");
+                        anim.ResetTrigger("ActionStop");
+                        anim.SetTrigger("ActionStop");
+                    }
                 }
             }
-            anim.ResetTrigger("ActionStop");
-            anim.SetTrigger("ActionStop");
-            anim.Update(0f);*/
 
             if (i == 0)
             {
