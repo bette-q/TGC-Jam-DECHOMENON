@@ -142,7 +142,7 @@ public class SocketManager : MonoBehaviour
         Transform socketGO = sb.socket;               // this is the GameObject you created in BindSockets
         Transform attachPoint = sb.comboAnchor;       // for final parenting
 
-        // 2) Find the organ_root on the *organ* instance
+        /*// 2) Find the organ_root on the *organ* instance
         Transform childRoot = SocketDatabase.Instance.GetOrganRoot(organGO);
         if (childRoot == null)
         {
@@ -178,6 +178,52 @@ public class SocketManager : MonoBehaviour
         organGO.transform.position += deltaP;
 
         // 9) Parent the organ under the socket anchor so it stays attached
+        organGO.transform.SetParent(attachPoint, true);*/
+
+        var db = SocketDatabase.Instance
+             ?? Object.FindFirstObjectByType<SocketDatabase>();
+        if (db == null) { Debug.LogError("SocketManager: No SocketDatabase."); return; }
+
+        Transform childRoot = db.GetOrganRoot(organGO);
+        if (childRoot == null)
+        {
+            Debug.LogError("SocketManager: no organ_root on " + organGO.name);
+            return;
+        }
+
+        // B) Look-up OrganData so we can use the head socket offsets
+        string prefabName = organGO.name.Replace("(Clone)", "");
+        OrganData cd = db.GetOrganData(prefabName);
+        if (cd == null) { Debug.LogError("SocketManager: no OrganData for " + prefabName); return; }
+
+        // We always attach HEAD → torso socket here
+        var cEntry = cd.head;
+
+        // 2) Compute *world* socket frames BEFORE we move anything
+        Vector3 pPosWS = socketGO.position;
+        Quaternion pRotWS = socketGO.rotation;
+
+        Vector3 cPosWS = childRoot.TransformPoint(cEntry.localPosition);
+        Quaternion cRotWS = childRoot.rotation * cEntry.localRotation;
+
+        // 3) Rotate organ so its head socket frame matches the torso socket frame
+        Quaternion deltaR = pRotWS * Quaternion.Inverse(cRotWS);
+
+        // Optional 180° flip around local X (same trick used in Attach)
+        Vector3 socketX = pRotWS * Vector3.right;
+        Quaternion flipX = Quaternion.AngleAxis(180f, socketX);
+        Quaternion fullR = flipX * deltaR;
+
+        organGO.transform.rotation = fullR * organGO.transform.rotation;
+
+        // 4) Re-sample child socket position AFTER rotation
+        Vector3 cPosWS2 = childRoot.TransformPoint(cEntry.localPosition);
+
+        // 5) Translate so the two sockets coincide
+        Vector3 deltaP = pPosWS - cPosWS2;
+        organGO.transform.position += deltaP;
+
+        // 6) Finally parent under the socket anchor so it stays attached
         organGO.transform.SetParent(attachPoint, true);
     }
 
