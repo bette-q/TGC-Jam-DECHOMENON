@@ -13,6 +13,7 @@ public class DefinePanelController : MonoBehaviour
     public Button RevertButton;
     public Button RedefineButton;
     public Transform previewPanel;
+    public ConstructPanelController constructPanelController;
 
     public Text CurrentDef;
 

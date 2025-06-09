@@ -136,5 +136,13 @@ public class ConstructPanelController : MonoBehaviour
         curPreviewRoot = null;
     }
 
+    public void ShowCardDetails(OrganCard card)
+    {
+
+        // Update text display
+        infoText.text = card.curType.ToString();
+
+    }
+
 }
 

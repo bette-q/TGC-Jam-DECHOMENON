@@ -12,6 +12,7 @@ public class SelectionManager : MonoBehaviour
     public List<GameObject> organCardPrefabs; 
 
     public DefinePanelController definePanelController;
+    public ConstructPanelController constructPanelController;
 
     //cards to generate
     public int numberOfCards = 5;
@@ -96,6 +97,7 @@ public class SelectionManager : MonoBehaviour
         };
 
         definePanelController.ShowCardDetails(selectedCard, topPanelCallback);
+        constructPanelController.ShowCardDetails(selectedCard);
     }
 
     private void Shuffle(List<GameObject> list)
