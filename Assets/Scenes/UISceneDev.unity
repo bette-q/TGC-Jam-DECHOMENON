@@ -6002,6 +6002,7 @@ MonoBehaviour:
   RevertButton: {fileID: 1509440364}
   RedefineButton: {fileID: 1887520435}
   previewPanel: {fileID: 180571472}
+  constructPanelController: {fileID: 0}
   CurrentDef: {fileID: 1389152286}
   playerCameraControl: {fileID: 241543892}
   viewHelper: {fileID: 1343874866}
@@ -10410,7 +10411,7 @@ GameObject:
   - component: {fileID: 1692159511}
   - component: {fileID: 1692159510}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: ListenerTeset
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10972,6 +10973,7 @@ MonoBehaviour:
   - {fileID: 919132149155446097, guid: 7e9d8d78366ce9b46b97edb76777ee32, type: 3}
   - {fileID: 919132149155446097, guid: a9459354161a3d54fb97a5b41994fe07, type: 3}
   definePanelController: {fileID: 839544309}
+  constructPanelController: {fileID: 356411026}
   numberOfCards: 9
 --- !u!4 &1746386595
 Transform:

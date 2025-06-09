@@ -1,7 +1,12 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using static CardDropSlot;
+using System.Linq;
+using Firebase.Firestore;
+using Firebase.Extensions;
+using Firebase;
+
 
 public class ConstructPanelController : MonoBehaviour
 {
@@ -25,6 +30,12 @@ public class ConstructPanelController : MonoBehaviour
     // Track if we've already warned about a red combo
     private bool waitingForRedConfirmation = false;
 
+    FirebaseFirestore _db;
+
+    private void Awake()
+    {
+        _db = FirebaseFirestore.DefaultInstance;
+    }
     private void Start()
     {
         inputButton.onClick.AddListener(OnInputClicked);
@@ -107,6 +118,32 @@ public class ConstructPanelController : MonoBehaviour
         infoText.text = "";
 
         //send to server 
+        int idx = GenerateIdx(isGreen);
+
+        // Build a List<string> of the prefab names
+        List<string> organNames = arrangedPrefabs
+            .Select(prefab => prefab.name)
+            .ToList();
+
+        // Prepare the merged payload: { sockets: { "<idx>": [ names… ] } }
+        var slotMap = new Dictionary<string, object> {
+            { idx.ToString(), organNames }
+        };
+        var payload = new Dictionary<string, object> {
+            { "sockets", slotMap }
+        };
+
+        // Firestore SetAsync with MergeAll will auto-create or merge your doc/map
+        _db.Collection("game")
+           .Document("sharedState")
+           .SetAsync(payload, SetOptions.MergeAll)
+           .ContinueWithOnMainThread(task =>
+           {
+               if (task.IsFaulted)
+                   Debug.LogError($"✖ Failed to send combo: {task.Exception}");
+               else
+                   Debug.Log($"✔ Sent combo to slot {idx}: [{string.Join(", ", organNames)}]");
+           });
 
         comboManager.BuildFromOrder(arrangedPrefabs, isGreen);
 
@@ -142,6 +179,15 @@ public class ConstructPanelController : MonoBehaviour
         // Update text display
         infoText.text = card.curType.ToString();
 
+    }
+
+    private int GenerateIdx(bool isGreen)
+    {
+        int idx = isGreen
+            ? Random.Range(0, 6)
+            : Random.Range(0, 10);
+
+        return idx;
     }
 
 }
