@@ -9,12 +9,15 @@ public class ViewHelper : MonoBehaviour
     [Tooltip("Name of the layer used exclusively by this ViewHelper.")]
     public string viewLayerName = "None";
 
+    public float fixedAspectRatio = 16f / 9f;
+
     // Tracks the integer ID for the view layer
     private int _viewLayer = -1;
 
     // Keep track of the current root and instance so we can clear them
     private GameObject _currentRoot;
     private GameObject _currentInstance;
+
 
     private int ViewLayer
     {
@@ -48,6 +51,7 @@ public class ViewHelper : MonoBehaviour
         {
             viewCamera.cullingMask = 1 << layer;
         }
+        viewCamera.aspect = fixedAspectRatio;
     }
 
     public void ClearPreview()
