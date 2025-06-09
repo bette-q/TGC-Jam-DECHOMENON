@@ -30,6 +30,12 @@ public class SocketDatabase : MonoBehaviour
     {
         return allOrgans.Find(o => o.prefabName == prefabName);
     }
+
+    public GameObject GetPrefabByName(string prefabName)
+    {
+        return GetOrganData(prefabName).organPrefab;
+    }
+
     public Transform GetTorsoRoot(GameObject torsoInstance)
     {
         // fast name lookup; will return the first Transform named "torso_root"

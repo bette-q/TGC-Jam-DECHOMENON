@@ -127,9 +127,78 @@ public class ComboManager : MonoBehaviour
         LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
 
         // 4) Attach to torso
+        //socketManager.AttachByIdx(comboRoot, idx);
         socketManager.AttachRandom(comboRoot, isGreen);
     }
-    
+
+    public void BuildFromServer(List<GameObject> arrangedPrefabs, bool isGreen, int idx)
+    {
+        if (arrangedPrefabs == null || arrangedPrefabs.Count < 2 || arrangedPrefabs.Count > 5)
+        {
+            Debug.LogError("ComboManager: Combo must have between 2 and 5 organs.");
+            return;
+        }
+
+        // 1) Spawn the combo root
+        GameObject comboRoot = new GameObject("Combo");
+        GameObject prev = null;
+
+        // 2) Instantiate & chain each prefab
+        for (int i = 0; i < arrangedPrefabs.Count; i++)
+        {
+            var prefab = arrangedPrefabs[i];
+            if (prefab == null) continue;
+
+            GameObject inst = Instantiate(prefab, Vector3.zero, Quaternion.identity, transform);
+            inst.name = prefab.name;
+            inst.transform.localScale = Vector3.one;
+            inst.transform.SetParent(comboRoot.transform, false);
+
+            var animators = inst.GetComponentsInChildren<Animator>(true);
+            foreach (var anim in animators)
+            {
+                if (isGreen)
+                {
+                    // Entire combo goes “valid”
+                    anim.ResetTrigger("ActionStop");
+                    anim.ResetTrigger("ToValid");
+                    anim.SetTrigger("ToValid");
+                }
+                else
+                {
+                    // Only NON-root pieces stop their action
+                    if (i != 0)
+                    {
+                        anim.ResetTrigger("ToValid");
+                        anim.ResetTrigger("ActionStop");
+                        anim.SetTrigger("ActionStop");
+                    }
+                }
+            }
+
+            if (i == 0)
+            {
+                // first organ sits at this GameObject's origin
+                inst.transform.localPosition = Vector3.zero;
+                inst.transform.localRotation = Quaternion.identity;
+            }
+            else
+            {
+                bool isLast = (i == arrangedPrefabs.Count - 1);
+                string childKey = isLast ? "organ_socket_leaf" : "organ_socket_head";
+                Attach(inst, prev, childKey);
+            }
+
+            prev = inst;
+        }
+
+        // 3) Layer it
+        LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
+
+        // 4) Attach to torso
+        socketManager.AttachByIdx(comboRoot, idx);
+    }
+
 }
 
 

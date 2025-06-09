@@ -1,5 +1,6 @@
 // File: Assets/Scripts/VisualPanelController.cs
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,10 +19,13 @@ public class VisualPanelController : MonoBehaviour
     [Header("Torso Motion Controller")]
     public TorsoMotionController torsoMotionController;
 
+    [Header("Torso Sync (Firestore)")]
+    public TorsoSyncManager torsoSyncManager;
+
     private GameObject _currentPreview;
     //public static event Action<Transform> OnTorsoReady;
 
-    private void Start()
+    async void Start()
     {
         defaultTorsoPrefab = SocketDatabase.Instance.GetTorsoPrefab();
 
@@ -55,7 +59,17 @@ public class VisualPanelController : MonoBehaviour
                 // Reset internal state to avoid first-frame spikes
                 torsoMotionController.ResetMotionState();
             }
-            //OnTorsoReady?.Invoke(_currentPreview.transform);
+
+            if (torsoSyncManager != null)
+            {
+                Debug.Log("VisualPanelController: initializing torso sync...");
+                await torsoSyncManager.Initialize();
+                Debug.Log("VisualPanelController: torso sync is now listening");
+            }
+            else
+            {
+                Debug.LogError("VisualPanelController: no TorsoSyncManager assigned!");
+            }
         }
         else
         {

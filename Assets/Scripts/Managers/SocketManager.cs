@@ -133,6 +133,39 @@ public class SocketManager : MonoBehaviour
         attached[idx] = organGO;
     }
 
+    public void AttachByIdx(GameObject comboRoot, int idx)
+    {
+        LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
+
+        if (runtimeBindings.Count == 0)
+        {
+            Debug.LogError("SocketManager: No sockets bound.");
+            return;
+        }
+
+        ClearSocket(idx);
+
+        // 2) Pull the *one* organ you want to attach *for this test* out of the combo container
+        //    (assuming your comboRoot has exactly one direct child when you're calling AttachRandom)
+        if (comboRoot.transform.childCount == 0)
+        {
+            Debug.LogError("SocketManager: comboRoot has no child organs to attach.");
+            return;
+        }
+        GameObject organGO = comboRoot.transform.GetChild(0).gameObject;
+
+        Debug.LogError("SocketManager: socket " + idx);
+
+        // 3) Snap *that* organ onto the torso
+        AttachBodyPart(idx, organGO);
+
+        // 4) Finally, parent the entire combo under the torso so it moves with it
+        comboRoot.transform.SetParent(torsoRoot, true);
+
+        // record
+        attached[idx] = organGO;
+    }
+
     private void AttachBodyPart(int i, GameObject organGO)
     {
         if (i < 0 || i >= runtimeBindings.Count) return;

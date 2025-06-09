@@ -117,7 +117,7 @@ public class ConstructPanelController : MonoBehaviour
         HighlightSlots(Color.white);
         infoText.text = "";
 
-        //send to server 
+        // send to server 
         int idx = GenerateIdx(isGreen);
 
         // Build a List<string> of the prefab names
@@ -125,11 +125,20 @@ public class ConstructPanelController : MonoBehaviour
             .Select(prefab => prefab.name)
             .ToList();
 
-        // Prepare the merged payload: { sockets: { "<idx>": [ names… ] } }
-        var slotMap = new Dictionary<string, object> {
-            { idx.ToString(), organNames }
+        // Build the per-slot object with names + isGreen
+        var slotData = new Dictionary<string, object>
+        {
+            { "names",   organNames },
+            { "isGreen", isGreen   }
         };
-        var payload = new Dictionary<string, object> {
+        
+                // Merge that single slot into the sockets map
+                var slotMap = new Dictionary<string, object>
+        {
+            { idx.ToString(), slotData }
+        };
+                var payload = new Dictionary<string, object>
+        {
             { "sockets", slotMap }
         };
 
@@ -142,10 +151,10 @@ public class ConstructPanelController : MonoBehaviour
                if (task.IsFaulted)
                    Debug.LogError($"✖ Failed to send combo: {task.Exception}");
                else
-                   Debug.Log($"✔ Sent combo to slot {idx}: [{string.Join(", ", organNames)}]");
+                   Debug.Log($"✔ Sent slot {idx}: [{string.Join(", ", organNames)}], isGreen={isGreen}");
            });
 
-        comboManager.BuildFromOrder(arrangedPrefabs, isGreen);
+        //comboManager.BuildFromOrder(arrangedPrefabs, isGreen);
 
         ClearAllSlots();
     }
