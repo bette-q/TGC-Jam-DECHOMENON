@@ -456,70 +456,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1189256435
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1189256437}
-  - component: {fileID: 1189256436}
-  m_Layer: 0
-  m_Name: SpriteExporter
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1189256436
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1189256435}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca53a43cbcb114fd1bcf91a2826b18ad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  renderCam: {fileID: 614913668}
-  outputPath: Assets/Sprites/
-  organCards:
-  - {fileID: 11400000, guid: 8b3e9808e6cfd4c50a1ff78fb6d192ed, type: 2}
-  - {fileID: 11400000, guid: d8b23757bf4994bb4a9552e4a49775dc, type: 2}
-  - {fileID: 11400000, guid: f3377bec1fc4a486ba5d35e870c9d6e7, type: 2}
-  - {fileID: 11400000, guid: 75254859f9868463eb8913e16db034a8, type: 2}
-  - {fileID: 11400000, guid: 21670489f7b8c41c283194262ff8196a, type: 2}
-  - {fileID: 11400000, guid: fe0ef3d2612e34bbf9321b30275d6028, type: 2}
-  - {fileID: 11400000, guid: b1a063d1fa8494742802319cfbdf14b9, type: 2}
-  - {fileID: 11400000, guid: a48acba7cd0864e12aaeff81f24a8b94, type: 2}
-  - {fileID: 11400000, guid: 0bd50ab165cb9470db346d35970ee391, type: 2}
-  - {fileID: 11400000, guid: 9acb4b27f805145dabfe9e4a3ad9d2cf, type: 2}
-  - {fileID: 11400000, guid: 94dadbde5fe004326b6d6a4ad3877bf6, type: 2}
-  - {fileID: 11400000, guid: e19edd7c6c86c4dc9b0c405bca7373ab, type: 2}
-  - {fileID: 11400000, guid: 0eaa6fc47a92f4c5899623dd6e8123ae, type: 2}
-  - {fileID: 11400000, guid: f6ab673a325f64558bcf0e4589279ebc, type: 2}
-  - {fileID: 11400000, guid: 6bc7665038836421f9bf12f99822e1c1, type: 2}
-  baseSize: 1024
-  forceSquareCardMode: 1
---- !u!4 &1189256437
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1189256435}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2043878704
 GameObject:
   m_ObjectHideFlags: 0
@@ -627,6 +563,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 614913669}
   - {fileID: 378555784}
-  - {fileID: 1189256437}
   - {fileID: 2043878708}
   - {fileID: 688847551}
