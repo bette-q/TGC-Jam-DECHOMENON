@@ -1,32 +1,22 @@
-﻿// File: Assets/Scripts/FirebaseBootstrap.cs
-
+﻿using UnityEngine;
 using Firebase;
-using Firebase.Extensions;
-using Firebase.Firestore;
-using Firebase.Functions;
-using UnityEngine;
 
-[DefaultExecutionOrder(-100)]
-public class FirebaseBootstrap : MonoBehaviour
+public class FirebaseInitializer : MonoBehaviour
 {
     void Awake()
     {
-        // 1) Check all Firebase dependencies
-        FirebaseApp.CheckAndFixDependenciesAsync()
-            .ContinueWithOnMainThread(task =>
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
+        {
+            var dependencyStatus = task.Result;
+            if (dependencyStatus == DependencyStatus.Available)
             {
-                if (task.Result != DependencyStatus.Available)
-                {
-                    Debug.LogError($"Firebase init failed: {task.Result}");
-                    return;
-                }
-
-                // 2) Initialize Firestore and Functions for PRODUCTION
-                //    (No emulator overrides here.)
-                var firestore = FirebaseFirestore.DefaultInstance;
-                var functions = FirebaseFunctions.DefaultInstance;
-
-                Debug.Log("✅ Firebase initialized for PRODUCTION Firestore & Functions");
-            });
+                FirebaseApp app = FirebaseApp.DefaultInstance;
+                Debug.Log("Firebase initialized successfully.");
+            }
+            else
+            {
+                Debug.LogError($"Could not resolve Firebase dependencies: {dependencyStatus}");
+            }
+        });
     }
 }
