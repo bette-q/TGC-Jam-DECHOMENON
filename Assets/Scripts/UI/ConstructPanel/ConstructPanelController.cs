@@ -106,7 +106,7 @@ public class ConstructPanelController : MonoBehaviour
         HighlightSlots(Color.white);
         infoText.text = "";
 
-        
+        //send to server 
 
         comboManager.BuildFromOrder(arrangedPrefabs, isGreen);
 
