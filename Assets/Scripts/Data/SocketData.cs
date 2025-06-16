@@ -16,6 +16,7 @@ public struct TorsoSocketEntry
 public class TorsoData
 {
     public string prefabName;                  // e.g. "Torso_A" (no "(Clone)")
+    public GameObject torsoPrefab;
     public List<TorsoSocketEntry> sockets = new List<TorsoSocketEntry>();
 }
 
@@ -33,6 +34,7 @@ public struct OrganSocketEntry
 public class OrganData
 {
     public string prefabName;      // e.g. "LegOrgan"
+    public GameObject organPrefab;
     public OrganSocketEntry head;
     public OrganSocketEntry tail;
     public OrganSocketEntry leaf;

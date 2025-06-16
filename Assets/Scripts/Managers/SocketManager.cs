@@ -1,127 +1,223 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections.Generic;
 
 [System.Serializable]
 public class SocketBinding
 {
-    public string socketName;       // e.g. “Socket_ArmLeft”
-    public string comboAnchorName;  // e.g. “ComboAnchor_ArmLeft”
-    [HideInInspector] public Transform socket;       // actual Transform under instantiated torso
-    [HideInInspector] public Transform comboAnchor;  // actual child under that socket
+    public string socketName;     
+    public Transform socket;      
+    public Transform comboAnchor; 
 }
 
 public class SocketManager : MonoBehaviour
 {
-    [Tooltip("List all socket names + anchor names here (matches children under the torso prefab).")]
-    public List<SocketBinding> sockets = new List<SocketBinding>();
-
-    [SerializeField] int greenSocketCt = 3;
-
-    private Transform torsoRoot;   // set by ViewHelper
-
+    private Transform torsoRoot;
+    private List<SocketBinding> runtimeBindings = new List<SocketBinding>();
     private Dictionary<int, GameObject> attached = new Dictionary<int, GameObject>();
 
-    public void SetTorso(Transform torso)
-    {
-        torsoRoot = torso;
-    }
+    [SerializeField] private int greenSocketCt = 6;
 
-    public void BindSocketsToInstance()
+    public void SetTorso(GameObject torsoInstance)
     {
+        // 1) find the correct "torso_root" on this instance
+        torsoRoot = SocketDatabase.Instance
+            .GetTorsoRoot(torsoInstance);
+
         if (torsoRoot == null)
         {
-            Debug.LogError("SocketManager.BindSocketsToInstance: torsoRoot is null.");
+            Debug.LogError($"SocketManager: could not find torso_root on {torsoInstance.name}");
             return;
         }
 
-        for (int i = 0; i < sockets.Count; i++)
-        {
-            var sb = sockets[i];
-
-            // Find the socket Transform under the instantiated torso by name
-            Transform foundSocket = torsoRoot.Find(sb.socketName);
-            if (foundSocket == null)
-            {
-                Debug.LogError($"SocketManager: Could not find child '{sb.socketName}' under torso.");
-                continue;
-            }
-
-            sb.socket = foundSocket;
-
-            // Now find the comboAnchor under that socket by name
-            Transform foundAnchor = foundSocket.Find(sb.comboAnchorName);
-            if (foundAnchor == null)
-            {
-                Debug.LogError($"SocketManager: Could not find comboAnchor '{sb.comboAnchorName}' as child of '{sb.socketName}'.");
-                continue;
-            }
-
-            sb.comboAnchor = foundAnchor;
-
-            // Write back into the list
-            sockets[i] = sb;
-        }
+        BindSocketsToInstance();
     }
 
-    private void AttachBodyPart(int socketIdx, GameObject organRoot)
+    private void BindSocketsToInstance()
     {
-        Debug.Assert(socketIdx >= 0 && socketIdx < sockets.Count,
-                     $"Invalid socketIdx: {socketIdx}");
+        runtimeBindings.Clear();
 
-        if (attached.TryGetValue(socketIdx, out var oldPart))
+        if (torsoRoot == null)
         {
-            Destroy(oldPart);
-            attached.Remove(socketIdx);
-        }
-
-        var sb = sockets[socketIdx];
-        if (sb.comboAnchor == null)
-        {
-            Debug.LogError($"SocketManager: comboAnchor is null for socket index {socketIdx}.");
+            Debug.LogError("SocketManager: torsoRoot is null.");
             return;
         }
 
-        Transform attachPoint = sb.comboAnchor;
-
-        // Find the organ’s internal "SocketHead" (as before)
-        Transform inputSocket = organRoot.transform.GetChild(0).Find("SocketHead");
-
-        if (inputSocket == null)
+        var data = SocketDatabase.Instance.torsoData;
+        if (string.IsNullOrEmpty(data.prefabName))
         {
-            organRoot.transform.SetPositionAndRotation(attachPoint.position,
-                                                       attachPoint.rotation);
-        }
-        else
-        {
-            Quaternion deltaRot = attachPoint.rotation * Quaternion.Inverse(inputSocket.rotation);
-            organRoot.transform.rotation = deltaRot * organRoot.transform.rotation;
-
-            Vector3 worldDelta = attachPoint.position - inputSocket.position;
-            organRoot.transform.position += worldDelta;
+            Debug.LogError("SocketManager: torsoData.prefabName empty; run parser first.");
+            return;
         }
 
-        organRoot.transform.SetParent(attachPoint, worldPositionStays: true);
+        // Remove any old sockets
+        foreach (Transform child in torsoRoot)
+            if (child.name.StartsWith("torso_socket_"))
+                DestroyImmediate(child.gameObject);
 
-        // Fix scale
-        Vector3 parentScale = attachPoint.lossyScale;
-        Vector3 currentScale = organRoot.transform.lossyScale;
+        // Re-create sockets under torsoRoot
+        foreach (var entry in data.sockets)
+        {
+            var sockGO = new GameObject(entry.name);
+            sockGO.transform.SetParent(torsoRoot, false);
 
-        Vector3 scaleFix = new Vector3(
-            parentScale.x / currentScale.x,
-            parentScale.y / currentScale.y,
-            parentScale.z / currentScale.z);
+            // world‐position & rotation via TransformPoint, then parent
+            Vector3 worldPos = torsoRoot.TransformPoint(entry.localPosition);
+            Quaternion worldRot = torsoRoot.rotation * entry.localRotation;
 
-        organRoot.transform.localScale = Vector3.Scale(organRoot.transform.localScale, scaleFix);
+            sockGO.transform.position = worldPos;
+            sockGO.transform.rotation = worldRot;
+            sockGO.transform.localScale = Vector3.one;
 
-        attached[socketIdx] = organRoot;
+            // comboAnchor child
+            var anchorGO = new GameObject("comboAnchor");
+            anchorGO.transform.SetParent(sockGO.transform, false);
+
+            runtimeBindings.Add(new SocketBinding
+            {
+                socketName = entry.name,
+                socket = sockGO.transform,
+                comboAnchor = anchorGO.transform
+            });
+        }
     }
-
-    public void AttachRandom(GameObject organRoot, bool isGreen)
+    public List<SocketBinding> GetActiveBindings()
     {
-        int socketIdx = isGreen
-            ? Random.Range(0, Mathf.Min(greenSocketCt, sockets.Count))
-            : Random.Range(0, sockets.Count);
-
-        AttachBodyPart(socketIdx, organRoot);
+        return runtimeBindings;
     }
+    public void ClearSocket(int i)
+    {
+        if (attached.TryGetValue(i, out var oldCombo))
+        {
+            // you might want to add some fade-out or pooling instead of Destroy
+            Destroy(oldCombo);
+            attached.Remove(i);
+        }
+
+    }
+    public void AttachRandom(GameObject comboRoot, bool isGreen)
+    {
+        LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
+
+        if (runtimeBindings.Count == 0)
+        {
+            Debug.LogError("SocketManager: No sockets bound.");
+            return;
+        }
+
+        // 1) Randomly pick a socket index
+        int maxGreen = Mathf.Min(greenSocketCt, runtimeBindings.Count);
+        int idx = isGreen
+            ? Random.Range(0, maxGreen)
+            : Random.Range(0, runtimeBindings.Count);
+
+        ClearSocket(idx);
+
+        // 2) Pull the *one* organ you want to attach *for this test* out of the combo container
+        //    (assuming your comboRoot has exactly one direct child when you're calling AttachRandom)
+        if (comboRoot.transform.childCount == 0)
+        {
+            Debug.LogError("SocketManager: comboRoot has no child organs to attach.");
+            return;
+        }
+        GameObject organGO = comboRoot.transform.GetChild(0).gameObject;
+
+        Debug.LogError("SocketManager: socket " + idx);
+
+        // 3) Snap *that* organ onto the torso
+        AttachBodyPart(idx, organGO);
+
+        // 4) Finally, parent the entire combo under the torso so it moves with it
+        comboRoot.transform.SetParent(torsoRoot, true);
+
+        // record
+        attached[idx] = organGO;
+    }
+
+    public void AttachByIdx(GameObject comboRoot, int idx)
+    {
+        LayerUtils.SetLayerRecursively(comboRoot, LayerMask.NameToLayer("VisualLayer"));
+
+        if (runtimeBindings.Count == 0)
+        {
+            Debug.LogError("SocketManager: No sockets bound.");
+            return;
+        }
+
+        ClearSocket(idx);
+
+        // 2) Pull the *one* organ you want to attach *for this test* out of the combo container
+        //    (assuming your comboRoot has exactly one direct child when you're calling AttachRandom)
+        if (comboRoot.transform.childCount == 0)
+        {
+            Debug.LogError("SocketManager: comboRoot has no child organs to attach.");
+            return;
+        }
+        GameObject organGO = comboRoot.transform.GetChild(0).gameObject;
+
+        // 3) Snap *that* organ onto the torso
+        AttachBodyPart(idx, organGO);
+
+        // 4) Finally, parent the entire combo under the torso so it moves with it
+        comboRoot.transform.SetParent(torsoRoot, true);
+
+        // record
+        attached[idx] = organGO;
+    }
+
+    private void AttachBodyPart(int i, GameObject organGO)
+    {
+        if (i < 0 || i >= runtimeBindings.Count) return;
+
+        // 1) Get the *actual* socket GO under the torso, not just the parsed data
+        var sb = runtimeBindings[i];
+        Transform socketGO = sb.socket;               // this is the GameObject you created in BindSockets
+        Transform attachPoint = sb.comboAnchor;       // for final parenting
+                                                      // 
+        var db = SocketDatabase.Instance
+             ?? Object.FindFirstObjectByType<SocketDatabase>();
+        if (db == null) { Debug.LogError("SocketManager: No SocketDatabase."); return; }
+
+        Transform childRoot = db.GetOrganRoot(organGO);
+        if (childRoot == null)
+        {
+            Debug.LogError("SocketManager: no organ_root on " + organGO.name);
+            return;
+        }
+
+        // B) Look-up OrganData so we can use the head socket offsets
+        string prefabName = organGO.name.Replace("(Clone)", "");
+        OrganData cd = db.GetOrganData(prefabName);
+        if (cd == null) { Debug.LogError("SocketManager: no OrganData for " + prefabName); return; }
+
+        // We always attach HEAD → torso socket here
+        var cEntry = cd.head;
+
+        // 2) Compute *world* socket frames BEFORE we move anything
+        Vector3 pPosWS = socketGO.position;
+        Quaternion pRotWS = socketGO.rotation;
+
+        Vector3 cPosWS = childRoot.TransformPoint(cEntry.localPosition);
+        Quaternion cRotWS = childRoot.rotation * cEntry.localRotation;
+
+        // 3) Rotate organ so its head socket frame matches the torso socket frame
+        Quaternion deltaR = pRotWS * Quaternion.Inverse(cRotWS);
+
+        // Optional 180° flip around local X (same trick used in Attach)
+        Vector3 socketX = pRotWS * Vector3.right;
+        Quaternion flipX = Quaternion.AngleAxis(180f, socketX);
+        Quaternion fullR = flipX * deltaR;
+
+        organGO.transform.rotation = fullR * organGO.transform.rotation;
+
+        // 4) Re-sample child socket position AFTER rotation
+        Vector3 cPosWS2 = childRoot.TransformPoint(cEntry.localPosition);
+
+        // 5) Translate so the two sockets coincide
+        Vector3 deltaP = pPosWS - cPosWS2;
+        organGO.transform.position += deltaP;
+
+        // 6) Finally parent under the socket anchor so it stays attached
+        organGO.transform.SetParent(attachPoint, true);
+    }
+
 }

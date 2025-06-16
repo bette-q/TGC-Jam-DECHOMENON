@@ -1,34 +1,57 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
+using Newtonsoft.Json.Linq;
+using System.Collections;
+using UnityEngine.Networking;
+
+#if !UNITY_WEBGL
+using Firebase;
+using Firebase.Firestore;
+using Firebase.Extensions;
+#endif
+
 using static CardDropSlot;
 
 public class ConstructPanelController : MonoBehaviour
 {
-    [Header("Drag & Drop Slots (0�C4)")]
+    [Header("Drag & Drop Slots (0?C4)")]
     public CardDropSlot[] slots = new CardDropSlot[5];
 
     [Header("UI Elements")]
     public Button inputButton;
     public Text infoText;
+    public Animator panelAnimator;
+    public GameObject startPanel;
 
     [Header("Combo System")]
     public ComboManager comboManager;
 
+    public StartButtonCooldown cdControl;
+
     [Header("Preview Camera Setup")]
     public PlayerCameraControl playerCameraControl;
     public ViewHelper viewHelper;
-    private GameObject _currentPreviewRoot = null;
-
-    [Header("Fullscreen Management")]
-    public FullscreenManager fullscreenManager;
+    private GameObject curPreviewRoot = null;
 
     // Track if we've already warned about a red combo
     private bool waitingForRedConfirmation = false;
 
+#if !UNITY_WEBGL
+    FirebaseFirestore _db;
+#endif
+
+    private void Awake()
+    {
+#if !UNITY_WEBGL
+        _db = FirebaseFirestore.DefaultInstance;
+#endif
+    }
     private void Start()
     {
         inputButton.onClick.AddListener(OnInputClicked);
+
 
         //hook up preview callback
         foreach (var slot in slots)
@@ -37,44 +60,29 @@ public class ConstructPanelController : MonoBehaviour
         }
     }
 
+
     private void OnSlotChangedHandler(int slotIndex, DraggableCard newCard)
     {
-        // If a card was dropped into this slot:
         if (newCard != null && newCard.organCard != null)
         {
-            // Clear any previous preview
             viewHelper.ClearPreview();
-
-            // Show the new prefab under the same preview camera
-            _currentPreviewRoot = viewHelper.ShowPreview(newCard.organCard.organPrefab);
-
-            // Tell the camera control what to rotate/zoom
-            if (playerCameraControl != null && _currentPreviewRoot != null)
-            {
-                playerCameraControl.viewRoot = _currentPreviewRoot.transform;
-            }
-        }
-        else
-        {
-            // Slot emptied or card removed: clear the preview
-            viewHelper.ClearPreview();
+            curPreviewRoot = viewHelper.ShowPreview(newCard.organCard.organPrefab);
             if (playerCameraControl != null)
-            {
-                playerCameraControl.viewRoot = null;
-            }
-            _currentPreviewRoot = null;
+                playerCameraControl.viewRoot = curPreviewRoot.transform;
+
         }
+  
     }
 
     private void OnInputClicked()
     {
         if (slots[0].containedDraggable == null || slots[4].containedDraggable == null)
         {
-            infoText.text = "Missing key components";
+            infoText.text = "All required slots must be filled before you can input.";
             return;
         }
 
-        //Collect each slot��s 3D prefab and OrganCard data in slot order
+        //Collect each slot??s 3D prefab and OrganCard data in slot order
         List<GameObject> arrangedPrefabs = new List<GameObject>();
         List<OrganCard> arrangedCards = new List<OrganCard>();
 
@@ -92,7 +100,7 @@ public class ConstructPanelController : MonoBehaviour
             }
         }
 
-        //��Green combo�� check (root = first, terminal = last, conductors = middle)
+        //??Green combo?? check (root = first, terminal = last, conductors = middle)
         OrganCard rootCard = arrangedCards[0];
         OrganCard terminalCard = arrangedCards[arrangedCards.Count - 1];
         List<OrganCard> conductorCards = arrangedCards.GetRange(1, arrangedCards.Count - 2);
@@ -107,29 +115,55 @@ public class ConstructPanelController : MonoBehaviour
         if (!isGreen && !waitingForRedConfirmation)
         {
             waitingForRedConfirmation = true;
-            infoText.text = "Warning: This is a RED combo. Click Input again to confirm.";
+            infoText.text = "This assembly breaks the grammar, click INPUT again to proceed.";
             HighlightSlots(Color.red);
             return;
         }
 
-        //Either it��s already green, or the player confirmed a red combo
+        //Either it??s already green, or the player confirmed a red combo
+        // animator added here
+        panelAnimator.SetTrigger("Input");
+        startPanel.SetActive(true);
+
         waitingForRedConfirmation = false;
         HighlightSlots(Color.white);
         infoText.text = "";
 
-        comboManager.BuildFromOrder(arrangedPrefabs, isGreen);
+        // send to server 
+        int idx = GenerateIdx(isGreen);
 
+        // Build a List<string> of the prefab names
+        List<string> organNames = arrangedPrefabs
+            .Select(prefab => prefab.name)
+            .ToList();
+
+#if UNITY_WEBGL
+        StartCoroutine(PatchSharedState(idx, organNames, isGreen));
+#else
+        var slotData = new Dictionary<string, object>
+        {
+            { "names",   organNames },
+            { "isGreen", isGreen   }
+        };
+
+        var slotMap = new Dictionary<string, object>
+        {
+            { idx.ToString(), slotData }
+        };
+
+        var payload = new Dictionary<string, object>
+        {
+            { "sockets", slotMap }
+        };
+
+        _db.Collection("game")
+           .Document("sharedState")
+           .SetAsync(payload, SetOptions.MergeAll);
+#endif
+
+
+        cdControl.TriggerCooldown();
         ClearAllSlots();
-        
-        // 进入全屏模式显示器官面板
-        if (fullscreenManager != null)
-        {
-            fullscreenManager.EnterFullscreen();
-        }
-        else
-        {
-            Debug.LogWarning("ConstructPanelController: FullscreenManager is not assigned!");
-        }
     }
 
     private void HighlightSlots(Color c)
@@ -152,7 +186,86 @@ public class ConstructPanelController : MonoBehaviour
         viewHelper.ClearPreview();
         if (playerCameraControl != null)
             playerCameraControl.viewRoot = null;
-        _currentPreviewRoot = null;
+        curPreviewRoot = null;
     }
 
+    public void ShowCardDetails(OrganCard card)
+    {
+
+        // Update text display
+        infoText.text = card.curType.ToString();
+
+    }
+
+    private int GenerateIdx(bool isGreen)
+    {
+        int idx = isGreen
+            ? Random.Range(0, 6)
+            : Random.Range(0, 10);
+
+        return idx;
+    }
+
+#if UNITY_WEBGL
+    private IEnumerator PatchSharedState(int idx, List<string> names, bool isGreen)
+    {
+        // build Firestore REST “Document” JSON
+        var doc = new JObject(
+          new JProperty("fields",
+            new JObject(
+              new JProperty("sockets",
+                new JObject(
+                  new JProperty("mapValue",
+                    new JObject(
+                      new JProperty("fields",
+                        new JObject(
+                          new JProperty(idx.ToString(),
+                            new JObject(
+                              new JProperty("mapValue",
+                                new JObject(
+                                  new JProperty("fields",
+                                    new JObject(
+                                      new JProperty("isGreen",
+                                        new JObject(new JProperty("booleanValue", isGreen))),
+                                      new JProperty("names",
+                                        new JObject(new JProperty("arrayValue",
+                                          new JObject(new JProperty("values",
+                                            new JArray(names.Select(n =>
+                                              new JObject(new JProperty("stringValue", n))))))))
+                                      )
+                                    )
+                                  )
+                                )
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        );
+        string body = doc.ToString();
+
+        string url = $"{FirestoreRestConfig.BASE_URL}/game/sharedState" +
+                     $"?key={FirestoreRestConfig.API_KEY}" +
+                     $"&currentDocument.exists=true";
+
+        var req = new UnityWebRequest(url, "PATCH")
+        {
+            uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(body)),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+        req.SetRequestHeader("Content-Type", "application/json");
+        yield return req.SendWebRequest();
+
+        if (req.result != UnityWebRequest.Result.Success)
+            Debug.LogError("REST PATCH failed: " + req.error);
+    }
+#endif
+
 }
+

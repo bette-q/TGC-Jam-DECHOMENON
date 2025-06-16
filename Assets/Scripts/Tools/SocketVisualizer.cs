@@ -1,33 +1,44 @@
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
-public class SocketVisualizer : MonoBehaviour
+[ExecuteAlways]
+[AddComponentMenu("Visualization/Torso Socket Visualizer")]
+public class TorsoSocketVisualizer : MonoBehaviour
 {
-    public float gizmoLength = 0.2f;
+    [Tooltip("Radius of each socket gizmo sphere")]
+    public float gizmoRadius = 0.05f;
+    [Tooltip("Color of the socket gizmo spheres")]
+    public Color gizmoColor = Color.yellow;
 
     private void OnDrawGizmos()
     {
-        foreach (Transform child in transform)
-        {
-            if (child.name.StartsWith("Socket"))
-            {
+        // 1) grab the database
+        var db = SocketDatabase.Instance
+                 ?? Object.FindFirstObjectByType<SocketDatabase>();
+        var data = db?.torsoData;
+        if (data?.sockets == null) return;
 
-                // Draw position sphere
-                Gizmos.color = Color.yellow;
-                Gizmos.DrawSphere(child.position, 0.08f);
+        // 2) choose the *correct* root transform
+        Transform root = db.GetOrganRoot(gameObject);
 
-      /*          // Draw forward direction (blue)
-                Gizmos.color = Color.blue;
-                Gizmos.DrawLine(child.position, child.position + child.forward * gizmoLength);
+        Gizmos.color = gizmoColor;
 
-                // Draw up direction (green)
-                Gizmos.color = Color.green;
-                Gizmos.DrawLine(child.position, child.position + child.up * gizmoLength);
-
-                // Draw right direction (red)
-                Gizmos.color = Color.red;
-                Gizmos.DrawLine(child.position, child.position + child.right * gizmoLength);*/
-            }
-        }
+        // 3) draw
+        foreach (var entry in data.sockets)
+            DrawSocket(entry, root);
     }
 
+    private void DrawSocket(TorsoSocketEntry entry, Transform parent)
+    {
+        // FBX-local ¡ú world
+        Vector3 worldPos = parent.TransformPoint(entry.localPosition);
+        Gizmos.DrawSphere(worldPos, gizmoRadius);
+
+#if UNITY_EDITOR
+        Handles.color = gizmoColor;
+        Handles.Label(worldPos + Vector3.up * gizmoRadius * 1.2f, entry.name);
+#endif
+    }
 }

@@ -9,7 +9,10 @@ public class FullscreenManager : MonoBehaviour
     
     [Header("Fullscreen Settings")]
     public float margin = 0f;               // 全屏时的边距（0为真正全屏）
-    
+
+    [Header("Visual Panel Components")]
+    public RawImage visualPanelRawImage;
+
     // 内部变量
     private bool isFullscreen = false;
     private Vector2 originalPosition;
@@ -40,6 +43,19 @@ public class FullscreenManager : MonoBehaviour
         else
         {
             Debug.LogError("FullscreenManager: Right panel container is not assigned!");
+        }
+
+        // Force RawImage to stretch with parent panel
+        if (visualPanelRawImage != null)
+        {
+            RectTransform rawRect = visualPanelRawImage.GetComponent<RectTransform>();
+            rawRect.anchorMin = Vector2.zero;
+            rawRect.anchorMax = Vector2.one;
+            rawRect.offsetMin = Vector2.zero;
+            rawRect.offsetMax = Vector2.zero;
+            rawRect.pivot = new Vector2(0.5f, 0.5f);
+
+            Debug.Log("FullscreenManager: Visual panel RawImage rect set to stretch.");
         }
     }
     

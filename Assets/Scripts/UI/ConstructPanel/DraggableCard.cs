@@ -10,6 +10,13 @@ public class DraggableCard : MonoBehaviour,
     [HideInInspector] public RectTransform homeParent;
     [HideInInspector] public int homeSiblingIndex;
 
+    public bool IsInSlot { get; set; } = false;
+    [Tooltip("Sprite to use when the card is in a slot.")]
+    public Sprite slottedSprite;
+
+    private Image _cardImage;
+    private Sprite _originalSprite;
+
     private Canvas _rootCanvas;
     private RectTransform _dragGhost;
     private CanvasGroup _ghostCanvasGroup;
@@ -27,6 +34,9 @@ public class DraggableCard : MonoBehaviour,
 
         // Cache this card¡¯s scale in the pool
         _originalScale = transform.localScale;
+
+        _cardImage = GetComponent<Image>();
+        _originalSprite = _cardImage.sprite;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -69,6 +79,9 @@ public class DraggableCard : MonoBehaviour,
         // Hide the original card while dragging
         _selfCanvasGroup.alpha = 0f;
         _selfCanvasGroup.blocksRaycasts = false;
+
+        IsInSlot = false;
+        UpdateCardSprite();
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -97,6 +110,8 @@ public class DraggableCard : MonoBehaviour,
         _selfCanvasGroup.alpha = 1f;
         _selfCanvasGroup.blocksRaycasts = true;
 
+        UpdateCardSprite();
+
         // If the card wasn¡¯t dropped into a new slot, it remains under _originalParent
         if (transform.parent == _originalParent)
         {
@@ -113,5 +128,16 @@ public class DraggableCard : MonoBehaviour,
         transform.localScale = _originalScale;
 
         transform.SetSiblingIndex(homeSiblingIndex);
+
+        IsInSlot = false;
+        UpdateCardSprite();
+    }
+    public void UpdateCardSprite()
+    {
+        if (_cardImage == null) return;
+
+        _cardImage.sprite = IsInSlot && slottedSprite != null
+            ? slottedSprite
+            : _originalSprite;
     }
 }

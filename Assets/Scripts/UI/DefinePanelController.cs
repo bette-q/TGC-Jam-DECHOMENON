@@ -15,6 +15,7 @@ public class DefinePanelController : MonoBehaviour
     public Transform previewPanel;
 
     public Text CurrentDef;
+    public Text DefText;
 
     [Header("Preview Camera Setup")]
     public PlayerCameraControl playerCameraControl;
@@ -53,8 +54,8 @@ public class DefinePanelController : MonoBehaviour
         selectedType = current;
 
         // Update text display
-        CurrentDef.text = current.ToString();
-
+        ShowTypeText(current);
+  
         ChangeSelectedButton(current);
 
         // Enable control buttons
@@ -73,6 +74,8 @@ public class DefinePanelController : MonoBehaviour
         }
     }
 
+
+
     public void ClearPanelState()
     {
         previewedCard = null;
@@ -87,8 +90,8 @@ public class DefinePanelController : MonoBehaviour
 
         onTopPanelUpdateCallback = null;
 
-        // Clear the preview
         viewHelper.ClearPreview();
+
         if (playerCameraControl != null)
         {
             playerCameraControl.viewRoot = null;
@@ -139,7 +142,8 @@ public class DefinePanelController : MonoBehaviour
         // Revert inside the card itself
         previewedCard.RevertToOriginal();
         OrganType orig = previewedCard.curType;
-        CurrentDef.text = orig.ToString();
+
+        ShowTypeText(orig);
         selectedType = orig;
 
         // Update visuals
@@ -154,11 +158,27 @@ public class DefinePanelController : MonoBehaviour
 
         // Assign the chosen type inside the card
         previewedCard.AssignDefinition(selectedType.Value);
-        CurrentDef.text = selectedType.ToString();
+        if(selectedType != null)
+        {
+            ShowTypeText(selectedType.Value);
+        }
 
         //update visuals
         ChangeSelectedButton(selectedType.Value);
 
         onTopPanelUpdateCallback?.Invoke(selectedType.ToString());
+    }
+
+    private void ShowTypeText(OrganType type)
+    {
+        CurrentDef.text = type.ToString();
+        DefText.text = (type) switch
+        {
+            (OrganType.Cellular) => "Skeleton of the body, defines where each part sits and how they are laid out in space.",
+            (OrganType.Genetic) => " Chronicle of the body, dictates the rhythm of growth, decay and mutation over time.",
+            (OrganType.Organic) => "Agency of the body, imbues each movement and response with living force.",
+            _ => ""
+        };
+
     }
 }

@@ -1,9 +1,39 @@
 fileFormatVersion: 2
-guid: 0eb64b87e297c3d419b0f42415e4a867
+guid: 8afdf0b9013c34f1d95c25d3288f0110
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Aorta1
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Artery
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: L_Atrium
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: R_Atrium
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Veins
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Ventricles1
+    second: {fileID: 2100000, guid: 72d7a7d863638498eae50c65ba83a98e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
