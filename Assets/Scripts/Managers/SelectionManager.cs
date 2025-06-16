@@ -55,6 +55,16 @@ public class SelectionManager : MonoBehaviour
             GameObject btnGO = Instantiate(cardButtonPrefab, cardPanel, false);
             btnGO.SetActive(true);
 
+            // added icon 
+            var iconImg = btnGO.transform.Find("Icon")?.GetComponent<Image>();
+            if (iconImg != null)
+            {
+                // find icon in prefab 
+                var spr = shuffled[i].GetComponentInChildren<SpriteRenderer>();
+                if (spr != null)
+                    iconImg.sprite = spr.sprite;
+            }           
+
             TMP_Text[] labels = btnGO.GetComponentsInChildren<TMP_Text>();
             foreach (var label in labels)
             {
